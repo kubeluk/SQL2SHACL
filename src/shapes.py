@@ -1,5 +1,8 @@
-from rdflib import Graph, URIRef, BNode, Literal
+from typing import Union
+from rdflib import Graph, URIRef, BNode, Literal, Namespace
 from rdflib.namespace import RDF, RDFS, SH
+
+UQ = Namespace("http://sirius−labs.no/shapes/unique#")
 
 
 class Base:
@@ -72,27 +75,56 @@ class CrdData(MaxData):
         self.g.add((self._b, SH.minCount, Literal(1)))
 
 
-# TODO: implement UnqTuple
+class UnqTuple:
+
+    g = Graph()
+    _b = BNode()
+
+    def __init__(self, cls: URIRef, *unq_props: URIRef):
+        for unq_prop_ in unq_props:
+            self.g.add((self._b, UQ["unqProp"], unq_prop_))
+        self.g.add((self._b, UQ["unqForClass"], cls))
 
 
 class Shape:
 
     g = Graph()
+    unq_component = Graph()
 
     def __init__(self, node: URIRef):
         self.node = node
         self.g.add((node, RDF.type, SH.NodeShape))
         self.g.add((node, RDF.type, RDFS.Class))
 
+    def add(self, x: Union[Base, UnqTuple]) -> None:
+        if isinstance(x, Base):
+            self.add_property(x)
+        elif isinstance(x, UnqTuple):
+            self.add_unique(x)
+        else:
+            raise ValueError(
+                f"Input should be of type Union[Base, UnqTuple]. You gave {type(x)}."
+            )
+
     def add_property(self, p: Base) -> None:
         self.g.add((self.node, SH.property, p._b))
         self.g += p.g
 
+    def add_unique(self, u: UnqTuple) -> None:
+        if len(self.unq_component) == 0:
+            self.unq_component = self.unq_component.parse(
+                "src/components/unique_values_constraint.ttl", format="ttl"
+            )
+            self.g += self.unq_component
+
+        self.g.add((self.node, UQ["uniqueValuesForClass"], u._b))
+        self.g += u.g
+
 
 if __name__ == "__main__":
     shape = Shape(URIRef("http://example.org/shapes#1"))
-    prop = InvMaxProp(
+    x = UnqTuple(
         URIRef("http://example.org/props#1"), URIRef("http://example.org/props#2")
     )
-    shape.add_property(prop)
+    shape.add(x)
     print(shape.g.serialize())

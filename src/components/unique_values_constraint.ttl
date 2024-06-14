@@ -1,0 +1,28 @@
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path uq:uniqueValuesForClass
+    ] ; 
+    sh:nodeValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:select """
+            SELECT $this ?other
+            WHERE { 
+                FILTER NOT EXISTS {
+                    GRAPH $shapesGraph {
+                        $uniqueValuesForClass uq:unqProp ?prop
+                    }
+                    $this ?prop ? thisVal .
+                    ?other ?prop ?otherVal .
+                    FILTER (?thisVal != ?otherVal)
+                }
+                FILTER (?other != $this )
+                GRAPH $shapesGraph {
+                    $uniqueValuesForClass uq:unqForClass ?class
+                } 
+                ?other rdf:type $class .
+            }
+        """
+    ] .
