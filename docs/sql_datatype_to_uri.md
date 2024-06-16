@@ -1,1 +1,1 @@
-insert here
+see: https://www.w3.org/TR/r2rml/#natural-mapping
