@@ -1,5 +1,6 @@
 import sqlparse
 from sqlparse.sql import Identifier, Parenthesis
+from sqlparse.tokens import Name, Keyword
 
 DDL = """
     CREATE TABLE Emp (
@@ -27,13 +28,20 @@ DDL = """
 def main():
     parsed = sqlparse.parse(DDL)
     for stmt in parsed:
-        for tkn_ in stmt.tokens:
-            if isinstance(tkn_, Identifier):
-                print(tkn_)
-            if isinstance(tkn_, Parenthesis):
-                for sub in tkn_.tokens:
-                    print(sub)
-        break
+        if stmt.get_type() == "CREATE":
+            for tkn in stmt.tokens:
+                if isinstance(tkn, Identifier):
+                    print(f"rel: {tkn.get_real_name()}")
+                if isinstance(tkn, Parenthesis):
+                    for sub in tkn.flatten():
+                        if not sub.is_whitespace:
+                            # print(sub.ttype, sub)
+                            if sub.match(Name, None):
+                                print(f"col: {sub}")
+                            if sub.match(Name.Builtin, None):
+                                print(f"datatype: {sub}")
+                            if sub.match(Keyword, None):
+                                print(f"constraint: {sub}")
 
 
 if __name__ == "__main__":
