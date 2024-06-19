@@ -2,7 +2,6 @@ import sqlparse
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList
 from sqlparse.tokens import Name, Punctuation
 from typing import List, Dict
-from pprint import pprint
 
 
 def _is_punctuation_end_of_expression(punct: Token, expression: List[Token]) -> bool:
@@ -82,30 +81,3 @@ def parse_ddl(ddl: str) -> Dict[str, List[List[Token]]]:
         relation_details[relation_name] = expressions
 
     return relation_details
-
-
-if __name__ == "__main__":
-    DDL = """
-        CREATE TABLE Emp (
-            E_id integer PRIMARY KEY,
-            Name text NOT NULL,
-            Post text
-        );
-        CREATE TABLE Acc (
-            A_id integer PRIMARY KEY,
-            Name text UNIQUE
-        );
-        CREATE TABLE Prj (
-            P_id integer PRIMARY KEY,
-            Name text NOT NULL,
-            ToAcc integer NOT NULL UNIQUE REFERENCES Acc (A_id)
-        );
-        CREATE TABLE Asg (
-            ToEmp integer REFERENCES Emp (E_id),
-            ToPrj integer REFERENCES Prj (P_id),
-            PRIMARY KEY (ToEmp, ToPrj)
-        );
-    """
-
-    relation_details = parse_ddl(DDL)
-    pprint(relation_details)
