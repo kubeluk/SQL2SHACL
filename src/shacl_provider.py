@@ -98,19 +98,19 @@ class Shape:
 
     def add(self, x: Union[Base, UnqTuple]) -> None:
         if isinstance(x, Base):
-            self.add_property(x)
+            self._add_property(x)
         elif isinstance(x, UnqTuple):
-            self.add_unique(x)
+            self._add_unique(x)
         else:
             raise ValueError(
                 f"Input should be of type Union[Base, UnqTuple]. You gave {type(x)}."
             )
 
-    def add_property(self, p: Base) -> None:
+    def _add_property(self, p: Base) -> None:
         self.g.add((self.node, SH.property, p._b))
         self.g += p.g
 
-    def add_unique(self, u: UnqTuple) -> None:
+    def _add_unique(self, u: UnqTuple) -> None:
         if len(self.unq_component) == 0:
             self.unq_component = self.unq_component.parse(
                 "src/components/unique_values_constraint.ttl", format="ttl"
