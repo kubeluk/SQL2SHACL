@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Dict
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Punctuation, Keyword
 from table_parser import parse_ddl
-from shacl_provider import Shape, MaxData, CrdData
+from shacl_provider import Shape, MaxData, CrdData, UnqTuple
 from table_classifier import is_relation_binary
 from iri_builder import (
     build_class_iri,
@@ -35,24 +35,34 @@ def _handle_table_constraint(shape: Shape, expression: List[Token]) -> None:
 
 
 def _handle_datatype(
-    rel_name: str, col: Token, dtype: Token, shape: Shape, expression: List[Token]
+    rel_name: str, col: Token, dtype: Token, shape: Shape, constraints: List[Token]
 ) -> None:
     """TODO"""
 
     attribute_uri = build_attribute_iri(rel_name, str(col))
     mapped_xmlschema_type_uri = build_datatype_iri(str(dtype))
 
-    for tkn in expression:
+    for tkn in constraints:
         if tkn.match(Keyword, "NOT NULL") or tkn.match(Keyword, "PRIMARY KEY"):
-            return shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
+            shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
+            return
 
-    return shape.add(MaxData(attribute_uri, mapped_xmlschema_type_uri))
+    shape.add(MaxData(attribute_uri, mapped_xmlschema_type_uri))
+    return
 
 
-def _handle_unique(shape: Shape, expression: List[Token]) -> None:
-    for tkn in expression:
-        if str(tkn) == "UNIQUE":
-            pass
+def _handle_unique(
+    rel_name: str, col: Token, shape: Shape, constraints: List[Token]
+) -> None:
+    """TODO"""
+
+    for tkn in constraints:
+        if tkn.match(Keyword, "UNIQUE") or tkn.match(Keyword, "PRIMARY KEY"):
+            shape.add(
+                UnqTuple(
+                    shape.node, build_attribute_iri(rel_name, str(col)), shape._b_unq
+                )
+            )
 
 
 def _handle_primary_key(shape: Shape, expression: List[Token]) -> None:
@@ -78,8 +88,10 @@ def _handle_column_constraint(
 
     _handle_datatype(rel_name, col, dtype, shape, constraints)
 
+    _handle_unique(rel_name, col, shape, constraints)
 
-def build_shapes(relation_details: dict) -> None:
+
+def build_shapes(relation_details: dict) -> Dict[str, Shape]:
     """Gets the output of table_parser.parse_ddl() and builds SHACL shapes from it.
 
     Token.Name: column name
@@ -108,8 +120,7 @@ def build_shapes(relation_details: dict) -> None:
         else:
             pass  # TODO: handle binary relations
 
-        for shape_ in shapes.values():
-            print(shape_.g.serialize())
+    return shapes
 
 
 if __name__ == "__main__":
@@ -136,4 +147,7 @@ if __name__ == "__main__":
     """
 
     relation_details = parse_ddl(DDL)
-    build_shapes(relation_details)
+    shapes = build_shapes(relation_details)
+
+    for shape_ in shapes.values():
+        print(shape_.g.serialize())

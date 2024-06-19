@@ -76,12 +76,10 @@ class CrdData(MaxData):
 
 class UnqTuple:
 
-    def __init__(self, cls: URIRef, *unq_props: URIRef):
+    def __init__(self, cls: URIRef, unq_prop: URIRef, _b_unq: BNode):
         self.g = Graph()
-        self._b = BNode()
-        for unq_prop_ in unq_props:
-            self.g.add((self._b, UQ["unqProp"], unq_prop_))
-        self.g.add((self._b, UQ["unqForClass"], cls))
+        self.g.add((_b_unq, UQ["unqProp"], unq_prop))
+        self.g.add((_b_unq, UQ["unqForClass"], cls))
 
 
 class Shape:
@@ -89,6 +87,8 @@ class Shape:
     def __init__(self, node: URIRef):
         self.g = Graph()
         self.unq_component = Graph()
+        # TODO: does every Shape need this unq_component or do I need to add it only once?
+        self._b_unq = BNode()
         self.node = node
         self.g.add((node, RDF.type, SH.NodeShape))
         self.g.add((node, RDF.type, RDFS.Class))
@@ -114,7 +114,7 @@ class Shape:
             )
             self.g += self.unq_component
 
-        self.g.add((self.node, UQ["uniqueValuesForClass"], u._b))
+        self.g.add((self.node, UQ["uniqueValuesForClass"], self._b_unq))
         self.g += u.g
 
 
