@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import List
 from rdflib import URIRef
+from utils.exceptions import UnsupportedSQLDatatypeException
 
 BASE = "http://to.do/"
 
@@ -18,7 +19,13 @@ def build_attribute_iri(rel_name: str, attribute_name: str) -> URIRef:
 
 
 def build_datatype_iri(dtype: str) -> URIRef:
-    return URIRef(SQLDTYPE_XMLSCHEMA_MAP[dtype])
+    try:
+        mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype]
+    except KeyError:
+        raise UnsupportedSQLDatatypeException(
+            f"SQL datatype <{dtype}> is not supported as of today."
+        )
+    return URIRef(mapped)
 
 
 def build_foreign_key_iri(

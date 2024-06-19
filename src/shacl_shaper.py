@@ -1,5 +1,4 @@
 from typing import List
-from rdflib import URIRef
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Punctuation, Keyword
 from table_parser import parse_ddl
@@ -36,16 +35,15 @@ def _handle_table_constraint(shape: Shape, expression: List[Token]) -> None:
 
 
 def _handle_datatype(
-    col_name: str, dtype: str, shape: Shape, expression: List[Token]
+    rel_name: str, col: Token, dtype: Token, shape: Shape, expression: List[Token]
 ) -> None:
     """TODO"""
 
-    attribute_uri = build_attribute_iri(col_name)
-    mapped_xmlschema_type_uri = build_datatype_iri(dtype)
+    attribute_uri = build_attribute_iri(rel_name, str(col))
+    mapped_xmlschema_type_uri = build_datatype_iri(str(dtype))
 
-    for tkn in expression:
-        if str(tkn) == "NOT NULL":
-            return shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
+    if Token(Keyword, "NOT NULL") in expression:
+        return shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
 
     return shape.add(MaxData(attribute_uri, mapped_xmlschema_type_uri))
 
@@ -68,34 +66,16 @@ def _handle_references(shape: Shape, expression: List[Token]) -> None:
             pass
 
 
-def _handle_column_constraint(shape: Shape, expression: List[Token]) -> None:
+def _handle_column_constraint(
+    rel_name: str, shape: Shape, expression: List[Token]
+) -> None:
     """TODO"""
 
-    col_name = expression[0]
+    col = expression[0]
     dtype = expression[1]
     constraints = expression[2:]
 
-    _handle_datatype(col_name, dtype, shape, constraints)
-
-    _handle_unique()
-
-    _handle_primary_key()
-
-    _handle_references()
-
-    for tkn in expression[2:]:
-        if str(tkn) == "PRIMARY KEY":
-            pass
-
-        if str(tkn) == "REFERENCES":
-            pass
-
-        if str(tkn) == "UNIQUE":
-            pass
-
-        print(tkn, tkn.ttype)
-
-    print("\n")
+    _handle_datatype(rel_name, col, dtype, shape, constraints)
 
 
 def build_shapes(relation_details: dict) -> None:
@@ -119,7 +99,7 @@ def build_shapes(relation_details: dict) -> None:
                 first_tkn = expression_[0]
 
                 if first_tkn.match(Name, None):
-                    _handle_column_constraint(shape, expression_)
+                    _handle_column_constraint(rel_name, shape, expression_)
 
                 if first_tkn.match(Keyword, None):
                     _handle_table_constraint(shape, expression_)
@@ -127,21 +107,24 @@ def build_shapes(relation_details: dict) -> None:
         else:
             pass  # TODO: handle binary relations
 
+        for shape_ in shapes.values():
+            print(shape_.g.serialize())
+
 
 if __name__ == "__main__":
     DDL = """
         CREATE TABLE Emp (
             E_id integer PRIMARY KEY,
-            Name text CONSTRAINT test_constraint NOT NULL,
-            Post text
+            Name char CONSTRAINT test_constraint NOT NULL,
+            Post char
         );
         CREATE TABLE Acc (
             A_id integer PRIMARY KEY,
-            Name text UNIQUE
+            Name char UNIQUE
         );
         CREATE TABLE Prj (
             P_id integer PRIMARY KEY,
-            Name text NOT NULL,
+            Name char NOT NULL,
             ToAcc integer NOT NULL UNIQUE REFERENCES Acc (A_id)
         );
         CREATE TABLE Asg (
