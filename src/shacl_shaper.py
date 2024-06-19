@@ -42,8 +42,9 @@ def _handle_datatype(
     attribute_uri = build_attribute_iri(rel_name, str(col))
     mapped_xmlschema_type_uri = build_datatype_iri(str(dtype))
 
-    if Token(Keyword, "NOT NULL") in expression:
-        return shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
+    for tkn in expression:
+        if tkn.match(Keyword, "NOT NULL") or tkn.match(Keyword, "PRIMARY KEY"):
+            return shape.add(CrdData(attribute_uri, mapped_xmlschema_type_uri))
 
     return shape.add(MaxData(attribute_uri, mapped_xmlschema_type_uri))
 
