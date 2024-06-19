@@ -7,10 +7,9 @@ UQ = Namespace("http://sirius−labs.no/shapes/unique#")
 
 class Base:
 
-    g = Graph()
-    _b = BNode()
-
     def __init__(self, path: URIRef):
+        self.g = Graph()
+        self._b = BNode()
         self.path = path
         self.g.add((self._b, SH.path, path))
 
@@ -77,10 +76,9 @@ class CrdData(MaxData):
 
 class UnqTuple:
 
-    g = Graph()
-    _b = BNode()
-
     def __init__(self, cls: URIRef, *unq_props: URIRef):
+        self.g = Graph()
+        self._b = BNode()
         for unq_prop_ in unq_props:
             self.g.add((self._b, UQ["unqProp"], unq_prop_))
         self.g.add((self._b, UQ["unqForClass"], cls))
@@ -88,10 +86,9 @@ class UnqTuple:
 
 class Shape:
 
-    g = Graph()
-    unq_component = Graph()
-
     def __init__(self, node: URIRef):
+        self.g = Graph()
+        self.unq_component = Graph()
         self.node = node
         self.g.add((node, RDF.type, SH.NodeShape))
         self.g.add((node, RDF.type, RDFS.Class))
