@@ -3,8 +3,8 @@ from rdflib import Graph
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
 from table_classifier import is_relation_binary
-from iri_builder import Builder, SequedaBuilder
-from sql_parser import TableParser, ConstraintParser
+from iri_builder import Builder
+from sql_parser import ConstraintParser
 from shacl_provider import (
     Node,
     MaxData,
