@@ -2,7 +2,9 @@ from typing import List, Dict
 from rdflib import Graph
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
-from table_parser import parse_ddl
+from table_classifier import is_relation_binary
+from iri_builder import Builder, SequedaBuilder
+from sql_parser import TableParser, ConstraintParser
 from shacl_provider import (
     Node,
     MaxData,
@@ -13,51 +15,80 @@ from shacl_provider import (
     InvMaxProp,
     InvProp,
 )
-from table_classifier import is_relation_binary
-from iri_builder import (
-    build_class_iri,
-    build_attribute_iri,
-    build_datatype_iri,
-    build_foreign_key_iri,
-    build_foreign_key_iri_binary,
-)
 
 
 class Shaper:
 
-    def __init__(self, relation_details: Dict[str, List[Token]]):
+    def __init__(self, iri_builder: Builder, relation_details: Dict[str, List[Token]]):
         self.shapes_graph = Graph()
+        self.iri_builder = iri_builder
         self.relation_details = relation_details
         self._unq_component_added = False
 
-    def _handle_table_constraint(self, expression: List[Token]) -> None:
+    def _handle_unique_tab_constraint(
+        self, rel_name: str, parenthesis: List[Token]
+    ) -> None:
+        """TODO"""
+
+        rel_uri = self.iri_builder.build_class_iri(rel_name)
+        col_uris = [
+            self.iri_builder.build_attribute_iri(rel_name, str(attr))
+            for attr in parenthesis
+            if attr.match(Name, None)
+        ]
+
+        self.shapes_graph += UnqTuple(rel_uri, *col_uris)
+
+    def _handle_foreign_key_tab_constraint(
+        self, rel_name: str, constraint_params: List[Token]
+    ) -> None:
+        """TODO"""
+
+        not_null, unique, col_names, referenced_rel_name, referenced_col_names = (
+            ConstraintParser.parse_foreign_key_tab_constraint(constraint_params)
+        )
+
+        if len(col_names) > 1:
+            print(
+                f"Foreign keys that constrain and reference a group of columns (<{col_names}>) are not supported yet"
+            )
+
+        self._handle_referenced_col(
+            rel_name,
+            col_names,
+            referenced_rel_name,
+            referenced_col_names,
+            not_null,
+            unique,
+        )
+
+    def _handle_table_constraint(self, rel_name: str, constraint: List[Token]) -> None:
         """Handles expressions that start with a Token of ttype Keyword.
 
         This is the case for expressions that only define constraints, e.g.:
             PRIMARY KEY (ToEmp, ToPrj)
         """
 
-        constraint = expression[0]
+        constraint_name = str(constraint[0])
+        constraint_params = constraint[1:]
 
-        match constraint:
-            case "PRIMARY KEY":
-                pass
-            case "FOREIGN KEY":
-                pass
-            case "UNIQUE":
-                pass
-            case _:
-                # TODO: log unhandled constraint
-                return
+        if (constraint_name == "UNIQUE") or (constraint_name == "PRIMARY KEY"):
+            self._handle_unique_tab_constraint(rel_name, constraint_params)
+
+        elif constraint_name == "FOREIGN KEY":
+            self._handle_foreign_key_tab_constraint(rel_name, constraint_params)
+
+        else:
+            print(f"<{constraint_name}> is not supported yet and will be skipped")
 
     def _handle_datatype_col_constraint(
         self, rel_name: str, col_name: str, dtype_name: str, constraints: List[Token]
     ) -> None:
         """TODO"""
 
-        rel_uri = build_class_iri(rel_name)
-        attribute_uri = build_attribute_iri(rel_name, col_name)
-        mapped_xmlschema_type_uri = build_datatype_iri(dtype_name)
+        rel_uri = self.iri_builder.build_class_iri(rel_name)
+        attribute_uri = self.iri_builder.build_attribute_iri(rel_name, col_name)
+        mapped_xmlschema_type_uri = self.iri_builder.build_datatype_iri(dtype_name)
 
         for tkn in constraints:
             if tkn.match(Keyword, "NOT NULL") or tkn.match(Keyword, "PRIMARY KEY"):
@@ -85,7 +116,8 @@ class Shaper:
         for tkn in constraints:
             if tkn.match(Keyword, "UNIQUE") or tkn.match(Keyword, "PRIMARY KEY"):
                 self.shapes_graph += UnqTuple(
-                    build_class_iri(rel_name), build_attribute_iri(rel_name, col_name)
+                    self.iri_builder.build_class_iri(rel_name),
+                    self.iri_builder.build_attribute_iri(rel_name, col_name),
                 )
 
             self._ensure_unique_component()
@@ -101,9 +133,9 @@ class Shaper:
     ) -> None:
         """TODO"""
 
-        rel_uri = build_class_iri(rel_name)
-        referenced_rel_uri = build_class_iri(referenced_rel_name)
-        path_obj_uri = build_foreign_key_iri(
+        rel_uri = self.iri_builder.build_class_iri(rel_name)
+        referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
+        path_obj_uri = self.iri_builder.build_foreign_key_iri(
             rel_name, referenced_rel_name, [col_name], [referenced_col_name]
         )
 
@@ -122,31 +154,21 @@ class Shaper:
     ) -> None:
         """TODO"""
 
-        not_null = False
-        unique = False
+        not_null, unique, referenced_rel_name, referenced_col_name = (
+            ConstraintParser.parse_references_col_constraint(constraints)
+        )
 
-        for idx, constraint_ in enumerate(constraints):
-            if constraint_.match(Keyword, "NOT NULL"):
-                not_null = True
+        if referenced_col_name is None:
+            return
 
-            if constraint_.match(Keyword, "UNIQUE"):
-                unique = True
-
-            if constraint_.match(Keyword, "REFERENCES"):
-                referenced_rel_name = str(constraints[idx + 1])
-                parenthesis_content = constraints[idx + 2 :]
-
-                for tkn in parenthesis_content:
-                    if tkn.match(Name, None):
-                        referenced_col_name = str(tkn)
-                        self._handle_referenced_col(
-                            rel_name,
-                            col_name,
-                            referenced_rel_name,
-                            referenced_col_name,
-                            not_null,
-                            unique,
-                        )
+        self._handle_referenced_col(
+            rel_name,
+            col_name,
+            referenced_rel_name,
+            referenced_col_name,
+            not_null,
+            unique,
+        )
 
     def _handle_column_constraint(self, rel_name: str, expression: List[Token]) -> None:
         """TODO"""
@@ -174,7 +196,7 @@ class Shaper:
             if not is_relation_binary(
                 expressions
             ):  # TODO: impelement is_relation_binary()
-                node_shape = Node(build_class_iri(rel_name))
+                node_shape = Node(self.iri_builder.build_class_iri(rel_name))
                 self.shapes_graph += node_shape
 
                 # TODO: add logging which expressions haven't been handled
@@ -185,39 +207,10 @@ class Shaper:
                         self._handle_column_constraint(rel_name, expression_)
 
                     if first_tkn.match(Keyword, None):
-                        self._handle_table_constraint(expression_)
+                        self._handle_table_constraint(rel_name, expression_)
 
-            # else:
-            #     pass  # TODO: handle binary relations
+            else:
+                # TODO: handle binary relations
+                pass
 
         return self.shapes_graph
-
-
-if __name__ == "__main__":
-    DDL = """
-        CREATE TABLE Emp (
-            E_id integer PRIMARY KEY,
-            Name char CONSTRAINT test_constraint NOT NULL,
-            Post char
-        );
-        CREATE TABLE Acc (
-            A_id integer PRIMARY KEY,
-            Name char UNIQUE
-        );
-        CREATE TABLE Prj (
-            P_id integer PRIMARY KEY,
-            Name char NOT NULL,
-            ToAcc integer NOT NULL UNIQUE REFERENCES Acc (A_id)
-        );
-        CREATE TABLE Asg (
-            ToEmp integer REFERENCES Emp (E_id),
-            ToPrj integer REFERENCES Prj (P_id),
-            PRIMARY KEY (ToEmp, ToPrj)
-        );
-    """
-
-    relation_details = parse_ddl(DDL)
-    shaper = Shaper(relation_details)
-    shapes_graph = shaper.build_shapes()
-
-    print(shapes_graph.serialize())
