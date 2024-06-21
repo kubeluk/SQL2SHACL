@@ -2,7 +2,7 @@ from typing import Dict, List
 from pprint import pprint
 from rdflib import Graph
 from sqlparse.sql import Token
-from sql_parser import TableParser
+from sql_parser import DDLParser
 from shacl_shaper import Shaper
 from iri_builder import Builder, SequedaBuilder
 
@@ -21,7 +21,7 @@ class ConstraintRewriter:
         cls, ddl: str, base_iri: str = "http://to.do/", iri_builder: str = "Sequeda"
     ):
         try:
-            relation_details = TableParser.parse_ddl(ddl)
+            relation_details = DDLParser.parse_ddl(ddl)
         except Exception:
             raise Exception("The provided DDL file could not be parsed properly")
 
@@ -46,7 +46,8 @@ class ConstraintRewriter:
         """TODO"""
 
         shaper = Shaper(self.iri_builder, self.relation_details)
-        self.shapes_graph += shaper.build_shapes()
+        shaper.build_shapes()
+        self.shapes_graph += shaper.get_shapes()
 
     def serialize_shapes(self) -> str:
         """TODO"""

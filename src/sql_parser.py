@@ -5,7 +5,7 @@ from sqlparse.tokens import Name, Punctuation, Keyword
 from typing import List, Dict
 
 
-class TableParser:
+class DDLParser:
 
     @staticmethod
     def _is_punctuation_end_of_expression(
@@ -67,17 +67,17 @@ class TableParser:
                     relation_name = tkn.get_real_name()
 
                 if isinstance(tkn, Parenthesis):
-                    subtkns = TableParser._get_parenthesis_subtkns(tkn)
+                    subtkns = DDLParser._get_parenthesis_subtkns(tkn)
                     expression_ = []
 
                     for subtkn_ in subtkns:
-                        if TableParser._is_last_tkn_in_list(subtkn_, subtkns):
+                        if DDLParser._is_last_tkn_in_list(subtkn_, subtkns):
                             expression_.append(subtkn_)
                             expressions.append(expression_)
                             expression_ = []
 
                         if subtkn_.match(Punctuation, ","):
-                            if TableParser._is_punctuation_end_of_expression(
+                            if DDLParser._is_punctuation_end_of_expression(
                                 subtkn_, subtkns
                             ):
                                 expressions.append(expression_)
@@ -89,6 +89,10 @@ class TableParser:
             relation_details[relation_name] = expressions
 
         return relation_details
+
+
+class TableParser:
+    pass
 
 
 class ConstraintParser:
