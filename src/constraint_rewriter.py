@@ -1,15 +1,48 @@
+from typing import Dict, List
+from pprint import pprint
+from rdflib import Graph
+from sqlparse.sql import Token
 from sql_parser import TableParser
 from shacl_shaper import Shaper
-from iri_builder import SequedaBuilder
+from iri_builder import Builder, SequedaBuilder
 
 
-class Rewriter:
+class ConstraintRewriter:
 
-    def __init__(self, ddl: str, base_uri: str = "http://to.do/"):
-        self.ddl = ddl
-        self.base_uri = base_uri
+    def __init__(
+        self, relation_details: Dict[str, List[List[Token]]], builder: Builder
+    ):
+        self.relation_details = relation_details
+        self.iri_builder = builder
+        self.shapes_graph = Graph()
 
-    def apply_constraint_rewriting(self):
+    @classmethod
+    def setup(
+        cls, ddl: str, base_iri: str = "http://to.do/", iri_builder: str = "Sequeda"
+    ):
+        try:
+            relation_details = TableParser.parse_ddl(ddl)
+        except Exception:
+            raise Exception("The provided DDL file could not be parsed properly")
+
+        if iri_builder == "Sequeda":
+            iri_builder = SequedaBuilder(base_iri)
+        else:
+            raise ValueError("Unknown IRI builder provided")
+
+        return cls(relation_details, iri_builder)
+
+    def get_parsed_ddl(self) -> Dict[str, List[List[Token]]]:
+        """TODO"""
+
+        return self.relation_details
+
+    def print_parsed_ddl(self) -> None:
+        """TODO"""
+
+        pprint(self.get_parsed_ddl())
+
+    def apply_rewriting(self):
         """Does the Constraint Rewriting from SQL to SHACL
 
         See Thapa2021 [1] for more details.
@@ -17,12 +50,18 @@ class Rewriter:
         [1] http://urn.nb.no/URN:NBN:no-90764
         """
 
-        relation_details = TableParser.parse_ddl(self.ddl)
-        iri_builder = SequedaBuilder(self.base_uri)
-        shaper = Shaper(iri_builder, relation_details)
-        self.shapes_graph = shaper.build_shapes()
+        shaper = Shaper(self.iri_builder, self.relation_details)
+        self.shapes_graph += shaper.build_shapes()
 
-        return self.shapes_graph
+    def serialize_shapes(self) -> str:
+        """TODO"""
+
+        return self.shapes_graph.serialize()
+
+    def print_shapes(self) -> str:
+        """TODO"""
+
+        print(self.serialize_shapes())
 
 
 if __name__ == "__main__":
@@ -48,5 +87,9 @@ if __name__ == "__main__":
             PRIMARY KEY (ToEmp, ToPrj)
         );
     """
-    sg = Rewriter(DDL).apply_constraint_rewriting()
-    print(sg.serialize())
+    cr = ConstraintRewriter.setup(DDL)
+    cr.apply_rewriting()
+
+    cr.print_parsed_ddl()
+    print("\n" + (80 * "#") + "\n")
+    cr.print_shapes()
