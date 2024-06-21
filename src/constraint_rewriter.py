@@ -43,12 +43,7 @@ class ConstraintRewriter:
         pprint(self.get_parsed_ddl())
 
     def apply_rewriting(self):
-        """Does the Constraint Rewriting from SQL to SHACL
-
-        See Thapa2021 [1] for more details.
-
-        [1] http://urn.nb.no/URN:NBN:no-90764
-        """
+        """TODO"""
 
         shaper = Shaper(self.iri_builder, self.relation_details)
         self.shapes_graph += shaper.build_shapes()

@@ -2,7 +2,6 @@ from typing import List, Dict
 from rdflib import Graph
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
-from table_classifier import is_relation_binary
 from iri_builder import Builder
 from sql_parser import ConstraintParser
 from shacl_provider import (
@@ -18,6 +17,12 @@ from shacl_provider import (
 
 
 class Shaper:
+    """Does the Constraint Rewriting from SQL to SHACL
+
+    See Thapa2021 [1] for more details.
+
+    [1] http://urn.nb.no/URN:NBN:no-90764
+    """
 
     def __init__(self, iri_builder: Builder, relation_details: Dict[str, List[Token]]):
         self.shapes_graph = Graph()
@@ -183,19 +188,17 @@ class Shaper:
         self._handle_unique_col_constraint(rel_name, col_name, constraints)
         self._handle_references_col_constraint(rel_name, col_name, constraints)
 
-    def build_shapes(self) -> Graph:
+    def build_shapes(self) -> None:
         """Gets the output of table_parser.parse_ddl() and builds SHACL shapes from it.
 
-        Token.Name: column name
+        Token.Name:         column name
         Token.Name.Builtin: data type
-        Token.Keyword: constraint
-        Token.Punctuation: parenthesis
+        Token.Keyword:      constraint
+        Token.Punctuation:  parenthesis
         """
 
         for rel_name, expressions in self.relation_details.items():
-            if not is_relation_binary(
-                expressions
-            ):  # TODO: impelement is_relation_binary()
+            if not TableClassifier.is_relation_binary(rel_name, expressions):
                 node_shape = Node(self.iri_builder.build_class_iri(rel_name))
                 self.shapes_graph += node_shape
 
@@ -213,4 +216,41 @@ class Shaper:
                 # TODO: handle binary relations
                 pass
 
+    def get_shapes(self) -> Graph:
+        """TODO"""
+
         return self.shapes_graph
+
+
+class TableClassifier:
+
+    @staticmethod
+    def is_relation_binary(rel_name: str, expressions: List[List[Token]]) -> bool:
+        """Returns if a relation is a binary relation
+
+        Informally, a relation R is a binary relation between two relations S and T if:
+
+            1. both S and T are different from R
+            2. R has exactly two attributes A and B, which form a primary key of R
+            3. A is the attribute of a foreign key in R that points to S
+            4. B is the attribute of a foreign key in R that points to T
+            5. A is not the attribute of two distinct foreign keys in R
+            6. B is not the attribute of two distinct foreign keys in R
+            7. A and B are not the attributes of a composite foreign key in R
+            8. relation R does not have incoming foreign keys
+
+        See Sequeda2012 [1] for details.
+
+        Example for a binary relation:
+        ```
+        CREATE TABLE Asg (
+            ToEmp integer REFERENCES Emp (E_id),
+            ToPrj integer REFERENCES Prj (P_id),
+            PRIMARY KEY (ToEmp, ToPrj)
+        )
+        ```
+
+        [1] https://doi.org/10.1145/2187836.2187924
+        """
+
+        return False
