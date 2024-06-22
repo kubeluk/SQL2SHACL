@@ -42,11 +42,11 @@ class ConstraintRewriter:
 
         pprint(self.get_parsed_ddl())
 
-    def apply_rewriting(self):
+    def rewrite(self):
         """TODO"""
 
         shaper = Shaper(self.iri_builder, self.relation_details)
-        shaper.build_shapes()
+        shaper.shape_up()
         self.shapes_graph += shaper.get_shapes()
 
     def serialize_shapes(self) -> str:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         );
     """
     cr = ConstraintRewriter.setup(DDL)
-    cr.apply_rewriting()
+    cr.rewrite()
 
     cr.print_parsed_ddl()
     print("\n" + (80 * "#") + "\n")

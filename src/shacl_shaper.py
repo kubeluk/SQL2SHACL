@@ -3,7 +3,7 @@ from rdflib import Graph
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
 from iri_builder import Builder
-from sql_parser import ConstraintParser
+from sql_parser import TableParser, ColumnConstraintParser, TableConstraintParser
 from shacl_provider import (
     Node,
     MaxData,
@@ -50,7 +50,7 @@ class Shaper:
         """TODO"""
 
         not_null, unique, col_names, referenced_rel_name, referenced_col_names = (
-            ConstraintParser.parse_foreign_key_tab_constraint(constraint_params)
+            TableConstraintParser.parse_foreign_key_tab_constraint(constraint_params)
         )
 
         if len(col_names) > 1:
@@ -160,7 +160,7 @@ class Shaper:
         """TODO"""
 
         not_null, unique, referenced_rel_name, referenced_col_name = (
-            ConstraintParser.parse_references_col_constraint(constraints)
+            ColumnConstraintParser.parse_references_col_constraint(constraints)
         )
 
         if referenced_col_name is None:
@@ -188,69 +188,43 @@ class Shaper:
         self._handle_unique_col_constraint(rel_name, col_name, constraints)
         self._handle_references_col_constraint(rel_name, col_name, constraints)
 
-    def build_shapes(self) -> None:
-        """Gets the output of table_parser.parse_ddl() and builds SHACL shapes from it.
+    def _shape_relation(self, rel_name: str, expressions: List[List[Token]]) -> None:
+        """TODO"""
 
-        Token.Name:         column name
-        Token.Name.Builtin: data type
-        Token.Keyword:      constraint
-        Token.Punctuation:  parenthesis
-        """
+        node_shape = Node(self.iri_builder.build_class_iri(rel_name))
+        self.shapes_graph += node_shape
+
+        # TODO: add logging which expressions haven't been handled
+        for expression_ in expressions:
+            first_tkn = expression_[0]
+
+            if first_tkn.match(Name, None):
+                self._handle_column_constraint(rel_name, expression_)
+
+            if first_tkn.match(Keyword, None):
+                self._handle_table_constraint(rel_name, expression_)
+
+    def _shape_binary_relation(self, rel_name, expressions: List[List[Token]]) -> None:
+        """TODO"""
+
+        pass
+
+    def shape_up(self) -> None:
+        """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
         for rel_name, expressions in self.relation_details.items():
-            if not TableClassifier.is_relation_binary(rel_name, expressions):
-                node_shape = Node(self.iri_builder.build_class_iri(rel_name))
-                self.shapes_graph += node_shape
+            other_rel_details = {
+                k: v for k, v in self.relation_details.items() if k != rel_name
+            }
+            rel_parser = TableParser(rel_name, expressions, other_rel_details)
 
-                # TODO: add logging which expressions haven't been handled
-                for expression_ in expressions:
-                    first_tkn = expression_[0]
-
-                    if first_tkn.match(Name, None):
-                        self._handle_column_constraint(rel_name, expression_)
-
-                    if first_tkn.match(Keyword, None):
-                        self._handle_table_constraint(rel_name, expression_)
+            if not rel_parser.is_relation_binary():
+                self._shape_relation(rel_name, expressions)
 
             else:
-                # TODO: handle binary relations
-                pass
+                self._shape_binary_relation(rel_name, expressions)
 
     def get_shapes(self) -> Graph:
         """TODO"""
 
         return self.shapes_graph
-
-
-class TableClassifier:
-
-    @staticmethod
-    def is_relation_binary(rel_name: str, expressions: List[List[Token]]) -> bool:
-        """Returns if a relation is a binary relation
-
-        Informally, a relation R is a binary relation between two relations S and T if:
-
-            1. both S and T are different from R
-            2. R has exactly two attributes A and B, which form a primary key of R
-            3. A is the attribute of a foreign key in R that points to S
-            4. B is the attribute of a foreign key in R that points to T
-            5. A is not the attribute of two distinct foreign keys in R
-            6. B is not the attribute of two distinct foreign keys in R
-            7. A and B are not the attributes of a composite foreign key in R
-            8. relation R does not have incoming foreign keys
-
-        See Sequeda2012 [1] for details.
-
-        Example for a binary relation:
-        ```
-        CREATE TABLE Asg (
-            ToEmp integer REFERENCES Emp (E_id),
-            ToPrj integer REFERENCES Prj (P_id),
-            PRIMARY KEY (ToEmp, ToPrj)
-        )
-        ```
-
-        [1] https://doi.org/10.1145/2187836.2187924
-        """
-
-        return False
