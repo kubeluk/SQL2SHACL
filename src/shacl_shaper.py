@@ -114,7 +114,7 @@ class Shaper:
         attribute_uri = self._iri_builder.build_attribute_iri(relation_name, col_name)
         mapped_xmlschema_type_uri = self._iri_builder.build_datatype_iri(dtype_name)
 
-        if col.has_unique_constraint():
+        if col.has_unique_constraint:
             self._shapes_graph += CrdData(
                 rel_uri, attribute_uri, mapped_xmlschema_type_uri
             )
@@ -207,13 +207,11 @@ class Shaper:
         if len(fk_constraints) == 2:  # column constraints
             unique_properties = [fk.is_unique for fk in fk_constraints]
             ref_rel_names = [fk.referenced_relation_name for fk in fk_constraints]
-            ref_col_names = [fk.referenced_column_name for fk in fk_constraints]
 
         elif len(fk_constraints) == 1:  # table constraint
             fk = fk_constraints[0]
             unique_properties = [fk.is_unique, fk.is_unique]
             ref_rel_names = [fk.referenced_relation_name, fk.referenced_relation_name]
-            ref_col_names = fk.referenced_column_names
 
         else:
             print(
@@ -224,31 +222,27 @@ class Shaper:
                 """
             )
 
-        # TODO
-        # rel_iri = self._iri_builder.build_class_iri()
-        # inv_rel_iri =
-        # path_iri =
-        # inv_path_iri =
-        # cls_iri =
-        # inv_cls_iri =
+        bin_rel_iri = self._iri_builder.build_class_iri(rel.name)
+        ref_rel_1_iri = self._iri_builder.build_class_iri(ref_rel_names[0])
+        ref_rel_2_iri = self._iri_builder.build_class_iri(ref_rel_names[1])
 
         if unique_properties[0]:
-            self._shapes_graph += MaxProp()
+            self._shapes_graph += MaxProp(ref_rel_1_iri, bin_rel_iri, ref_rel_2_iri)
 
         else:
-            self._shapes_graph += Prop()
+            self._shapes_graph += Prop(ref_rel_1_iri, bin_rel_iri, ref_rel_2_iri)
 
         if unique_properties[1]:
-            self._shapes_graph += InvMaxProp()
+            self._shapes_graph += InvMaxProp(ref_rel_2_iri, bin_rel_iri, ref_rel_1_iri)
 
         else:
-            self._shapes_graph += InvProp()
+            self._shapes_graph += InvProp(ref_rel_2_iri, bin_rel_iri, ref_rel_1_iri)
 
     def shape_up(self) -> None:
         """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
         for relation_ in self._relations:
-            if not self._ddl_manager.is_relation_binary(relation_.name):
+            if not self._ddl_manager.is_relation_binary(relation_):
                 self._shape_relation(relation_)
 
             else:

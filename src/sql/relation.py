@@ -230,8 +230,7 @@ class Relation:
                 cols.append(Column(self, first_tkn_name, other_tkns))
 
             if first_tkn.match(Keyword, None):
-
-                match first_tkn:
+                match first_tkn_name:
                     case "FOREIGN KEY":
                         tab_constraints.append(TableForeignKey(self, other_tkns))
 

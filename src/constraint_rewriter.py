@@ -87,6 +87,6 @@ if __name__ == "__main__":
     cr = ConstraintRewriter.setup(ddl_script)
     cr.rewrite()
 
-    cr.print_parsed_ddl()
-    print("\n" + (80 * "#") + "\n")
+    # cr.print_parsed_ddl()
+    # print("\n" + (80 * "#") + "\n")
     cr.print_shapes()
