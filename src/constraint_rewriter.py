@@ -2,26 +2,27 @@ from typing import Dict, List
 from pprint import pprint
 from rdflib import Graph
 from sqlparse.sql import Token
-from sql_parser import DDLParser
+from sql.ddl import DDL
 from shacl_shaper import Shaper
 from iri_builder import Builder, SequedaBuilder
 
 
 class ConstraintRewriter:
 
-    def __init__(
-        self, relation_details: Dict[str, List[List[Token]]], builder: Builder
-    ):
-        self.relation_details = relation_details
-        self.iri_builder = builder
+    def __init__(self, ddl_manager: DDL, iri_builder: Builder):
+        self.ddl_manager = ddl_manager
+        self.iri_builder = iri_builder
         self.shapes_graph = Graph()
 
     @classmethod
     def setup(
-        cls, ddl: str, base_iri: str = "http://to.do/", iri_builder: str = "Sequeda"
+        cls,
+        ddl_script: str,
+        base_iri: str = "http://to.do/",
+        iri_builder: str = "Sequeda",
     ):
         try:
-            relation_details = DDLParser.parse_ddl(ddl)
+            ddl_manager = DDL(ddl_script)
         except Exception:
             raise Exception("The provided DDL file could not be parsed properly")
 
@@ -30,12 +31,12 @@ class ConstraintRewriter:
         else:
             raise ValueError("Unknown IRI builder provided")
 
-        return cls(relation_details, iri_builder)
+        return cls(ddl_manager, iri_builder)
 
     def get_parsed_ddl(self) -> Dict[str, List[List[Token]]]:
         """TODO"""
 
-        return self.relation_details
+        return self.ddl_manager.get_relation_details()
 
     def print_parsed_ddl(self) -> None:
         """TODO"""
@@ -45,7 +46,7 @@ class ConstraintRewriter:
     def rewrite(self):
         """TODO"""
 
-        shaper = Shaper(self.iri_builder, self.relation_details)
+        shaper = Shaper(self.iri_builder, self.ddl_manager)
         shaper.shape_up()
         self.shapes_graph += shaper.get_shapes()
 
@@ -61,7 +62,7 @@ class ConstraintRewriter:
 
 
 if __name__ == "__main__":
-    DDL = """
+    ddl_script = """
         CREATE TABLE Emp (
             E_id integer PRIMARY KEY,
             Name char CONSTRAINT test_constraint NOT NULL,
@@ -83,7 +84,7 @@ if __name__ == "__main__":
             PRIMARY KEY (ToEmp, ToPrj)
         );
     """
-    cr = ConstraintRewriter.setup(DDL)
+    cr = ConstraintRewriter.setup(ddl_script)
     cr.rewrite()
 
     cr.print_parsed_ddl()

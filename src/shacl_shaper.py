@@ -1,9 +1,15 @@
-from typing import List, Dict
+from typing import List
 from rdflib import Graph
 from sqlparse.sql import Token
-from sqlparse.tokens import Name, Keyword
 from iri_builder import Builder
-from sql_parser import TableParser, ColumnConstraintParser, TableConstraintParser
+from sql.ddl import DDL
+from sql.relation import Relation
+from sql.column import Column
+from sql.constraint import (
+    Constraint,
+    TableUnique,
+    TableForeignKey,
+)
 from shacl_provider import (
     Node,
     MaxData,
@@ -24,86 +30,98 @@ class Shaper:
     [1] http://urn.nb.no/URN:NBN:no-90764
     """
 
-    def __init__(self, iri_builder: Builder, relation_details: Dict[str, List[Token]]):
+    def __init__(self, iri_builder: Builder, ddl_manager: DDL):
         self.shapes_graph = Graph()
         self.iri_builder = iri_builder
-        self.relation_details = relation_details
+        self.ddl_manager = ddl_manager
+        self.relations = ddl_manager.get_relations()
         self._unq_component_added = False
 
-    def _handle_unique_tab_constraint(
-        self, rel_name: str, parenthesis: List[Token]
-    ) -> None:
+    def _handle_unique_tab_constraint(self, tab_constraint: TableUnique) -> None:
         """TODO"""
 
+        rel_name = tab_constraint.get_relation_name()
         rel_uri = self.iri_builder.build_class_iri(rel_name)
+        # TODO: are groups of columns used for primary keys really covered
+        # by the custom SHACL SPARQL constraint from the paper?
+        # -> otherwise skip here if len(col_uris) > 1 and print warning
         col_uris = [
-            self.iri_builder.build_attribute_iri(rel_name, str(attr))
-            for attr in parenthesis
-            if attr.match(Name, None)
+            self.iri_builder.build_attribute_iri(rel_name, col_name)
+            for col_name in tab_constraint.get_col_names()
         ]
 
         self.shapes_graph += UnqTuple(rel_uri, *col_uris)
 
     def _handle_foreign_key_tab_constraint(
-        self, rel_name: str, constraint_params: List[Token]
+        self, tab_constraint: TableForeignKey
     ) -> None:
         """TODO"""
 
-        not_null, unique, col_names, referenced_rel_name, referenced_col_names = (
-            TableConstraintParser.parse_foreign_key_tab_constraint(constraint_params)
-        )
+        rel_name = tab_constraint.get_relation_name()
+        col_names = tab_constraint.get_column_names()
 
         if len(col_names) > 1:
             print(
                 f"Foreign keys that constrain and reference a group of columns (<{col_names}>) are not supported yet"
             )
+            return
 
-        self._handle_referenced_col(
-            rel_name,
-            col_names,
-            referenced_rel_name,
-            referenced_col_names,
-            not_null,
-            unique,
+        referenced_rel_name = tab_constraint.get_referenced_relation_name()
+        referenced_col_names = tab_constraint.get_referenced_col_names()
+        rel_uri = self.iri_builder.build_class_iri(rel_name)
+        referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
+        path_obj_uri = self.iri_builder.build_foreign_key_iri(
+            rel_name, referenced_rel_name, col_names, referenced_col_names
         )
 
-    def _handle_table_constraint(self, rel_name: str, constraint: List[Token]) -> None:
+        if tab_constraint.is_not_null():
+            self.shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
+        else:
+            self.shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
+
+        if tab_constraint.is_unique():
+            self.shapes_graph += InvMaxProp(referenced_rel_uri, path_obj_uri, rel_uri)
+        else:
+            self.shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
+
+    def _handle_table_constraint(self, tab_constraint: Constraint) -> None:
         """Handles expressions that start with a Token of ttype Keyword.
 
         This is the case for expressions that only define constraints, e.g.:
             PRIMARY KEY (ToEmp, ToPrj)
         """
 
-        constraint_name = str(constraint[0])
-        constraint_params = constraint[1:]
+        if isinstance(tab_constraint, TableUnique):
+            self._handle_unique_tab_constraint(tab_constraint)
 
-        if (constraint_name == "UNIQUE") or (constraint_name == "PRIMARY KEY"):
-            self._handle_unique_tab_constraint(rel_name, constraint_params)
-
-        elif constraint_name == "FOREIGN KEY":
-            self._handle_foreign_key_tab_constraint(rel_name, constraint_params)
+        elif isinstance(tab_constraint, TableForeignKey):
+            self._handle_foreign_key_tab_constraint(tab_constraint)
 
         else:
-            print(f"<{constraint_name}> is not supported yet and will be skipped")
+            print(
+                f"<{tab_constraint.get_constraint_name()}> is not supported yet and will be skipped"
+            )
 
-    def _handle_datatype_col_constraint(
-        self, rel_name: str, col_name: str, dtype_name: str, constraints: List[Token]
-    ) -> None:
+    def _handle_datatype_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        rel_uri = self.iri_builder.build_class_iri(rel_name)
-        attribute_uri = self.iri_builder.build_attribute_iri(rel_name, col_name)
+        relation_name = col.get_relation_name()
+        col_name = col.get_name()
+        dtype_name = col.get_data_type()
+
+        rel_uri = self.iri_builder.build_class_iri(relation_name)
+        attribute_uri = self.iri_builder.build_attribute_iri(relation_name, col_name)
         mapped_xmlschema_type_uri = self.iri_builder.build_datatype_iri(dtype_name)
 
-        for tkn in constraints:
-            if tkn.match(Keyword, "NOT NULL") or tkn.match(Keyword, "PRIMARY KEY"):
-                self.shapes_graph += CrdData(
-                    rel_uri, attribute_uri, mapped_xmlschema_type_uri
-                )
-                return
+        if col.has_unique_constraint():
+            self.shapes_graph += CrdData(
+                rel_uri, attribute_uri, mapped_xmlschema_type_uri
+            )
 
-        self.shapes_graph += MaxData(rel_uri, attribute_uri, mapped_xmlschema_type_uri)
-        return
+        else:
+            self.shapes_graph += MaxData(
+                rel_uri, attribute_uri, mapped_xmlschema_type_uri
+            )
 
     def _ensure_unique_component(self) -> None:
         if not self._unq_component_added:
@@ -113,96 +131,66 @@ class Shaper:
             self.shapes_graph += unq_component
             self._unq_component_added = True
 
-    def _handle_unique_col_constraint(
-        self, rel_name: str, col_name: str, constraints: List[Token]
-    ) -> None:
+    def _handle_unique_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        for tkn in constraints:
-            if tkn.match(Keyword, "UNIQUE") or tkn.match(Keyword, "PRIMARY KEY"):
-                self.shapes_graph += UnqTuple(
-                    self.iri_builder.build_class_iri(rel_name),
-                    self.iri_builder.build_attribute_iri(rel_name, col_name),
-                )
+        if col.has_unique_constraint():
+            rel_name = col.get_relation_name()
+            col_name = col.get_name()
+
+            self.shapes_graph += UnqTuple(
+                self.iri_builder.build_class_iri(rel_name),
+                self.iri_builder.build_attribute_iri(rel_name, col_name),
+            )
 
             self._ensure_unique_component()
 
-    def _handle_referenced_col(
-        self,
-        rel_name: str,
-        col_name: str,
-        referenced_rel_name: str,
-        referenced_col_name: str,
-        not_null: bool,
-        unique: bool,
-    ) -> None:
+    def _handle_references_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        rel_uri = self.iri_builder.build_class_iri(rel_name)
-        referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
-        path_obj_uri = self.iri_builder.build_foreign_key_iri(
-            rel_name, referenced_rel_name, [col_name], [referenced_col_name]
-        )
+        if col.has_references():
+            ref = col.get_references()
+            rel_name = col.get_relation_name()
+            referenced_rel_name = ref.get_referenced_rel_name()
+            col_name = ref.get_col_name()
+            referenced_col_name = ref.get_referenced_col_name()
+            rel_uri = self.iri_builder.build_class_iri(rel_name)
+            referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
+            path_obj_uri = self.iri_builder.build_foreign_key_iri(
+                rel_name, referenced_rel_name, [col_name], [referenced_col_name]
+            )
 
-        if not_null:
-            self.shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
-        else:
-            self.shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
+            if col.has_not_null_constraint():
+                self.shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
+            else:
+                self.shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
 
-        if unique:
-            self.shapes_graph += InvMaxProp(referenced_rel_uri, path_obj_uri, rel_uri)
-        else:
-            self.shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
+            if col.has_unique_constraint():
+                self.shapes_graph += InvMaxProp(
+                    referenced_rel_uri, path_obj_uri, rel_uri
+                )
+            else:
+                self.shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
 
-    def _handle_references_col_constraint(
-        self, rel_name: str, col_name: str, constraints: List[Token]
-    ) -> None:
+    def _handle_column_constraint(self, col: Column) -> None:
         """TODO"""
 
-        not_null, unique, referenced_rel_name, referenced_col_name = (
-            ColumnConstraintParser.parse_references_col_constraint(constraints)
-        )
+        self._handle_datatype_col_constraint(col)
+        self._handle_unique_col_constraint(col)
+        self._handle_references_col_constraint(col)
 
-        if referenced_col_name is None:
-            return
-
-        self._handle_referenced_col(
-            rel_name,
-            col_name,
-            referenced_rel_name,
-            referenced_col_name,
-            not_null,
-            unique,
-        )
-
-    def _handle_column_constraint(self, rel_name: str, expression: List[Token]) -> None:
+    def _shape_relation(self, rel: Relation) -> None:
         """TODO"""
 
-        col_name = str(expression[0])
-        dtype_name = str(expression[1])
-        constraints = expression[2:]
-
-        self._handle_datatype_col_constraint(
-            rel_name, col_name, dtype_name, constraints
-        )
-        self._handle_unique_col_constraint(rel_name, col_name, constraints)
-        self._handle_references_col_constraint(rel_name, col_name, constraints)
-
-    def _shape_relation(self, rel_name: str, expressions: List[List[Token]]) -> None:
-        """TODO"""
-
-        node_shape = Node(self.iri_builder.build_class_iri(rel_name))
+        node_shape = Node(self.iri_builder.build_class_iri(rel.get_name()))
         self.shapes_graph += node_shape
 
         # TODO: add logging which expressions haven't been handled
-        for expression_ in expressions:
-            first_tkn = expression_[0]
+        for column in rel.get_columns():
+            self._handle_column_constraint(column)
 
-            if first_tkn.match(Name, None):
-                self._handle_column_constraint(rel_name, expression_)
-
-            if first_tkn.match(Keyword, None):
-                self._handle_table_constraint(rel_name, expression_)
+        for table_constraint in rel.get_table_constraints():
+            self._handle_table_constraint(table_constraint)
 
     def _shape_binary_relation(self, rel_name, expressions: List[List[Token]]) -> None:
         """TODO"""
@@ -212,17 +200,12 @@ class Shaper:
     def shape_up(self) -> None:
         """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
-        for rel_name, expressions in self.relation_details.items():
-            other_rel_details = {
-                k: v for k, v in self.relation_details.items() if k != rel_name
-            }
-            rel_parser = TableParser(rel_name, expressions, other_rel_details)
-
-            if not rel_parser.is_relation_binary():
-                self._shape_relation(rel_name, expressions)
+        for relation_ in self.relations:
+            if not self.ddl_manager.is_relation_binary(relation_.get_name()):
+                self._shape_relation(relation_)
 
             else:
-                self._shape_binary_relation(rel_name, expressions)
+                self._shape_binary_relation(relation_)
 
     def get_shapes(self) -> Graph:
         """TODO"""

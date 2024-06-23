@@ -2,7 +2,7 @@ import sqlparse
 from typing import List, Dict
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList
 from sqlparse.tokens import Name, Punctuation
-from relation import Relation
+from .relation import Relation
 
 
 class DDL:
@@ -20,11 +20,20 @@ class DDL:
         self.relation_details = self._break_down_statements()
         self.relations = self._break_down_relations()
 
-    @property
-    def relation_names(self) -> List[str]:
+    def get_relation_details(self) -> Dict[str, List[List[Token]]]:
+        """TODO"""
+
+        return self.relation_details
+
+    def get_relation_names(self) -> List[str]:
         """TODO"""
 
         return [rel_name for rel_name in self.relation_details.keys()]
+
+    def get_relations(self) -> List[Relation]:
+        """TODO"""
+
+        return self.relations
 
     def get_relation_expressions(self, rel_name: str) -> List[List[Token]]:
         """TODO"""
@@ -110,8 +119,13 @@ class DDL:
 
         return relation_details
 
-    def _break_down_relations(self) -> Dict[str, List[Relation]]:
-        pass
+    def _break_down_relations(self) -> List[Relation]:
+        """TODO"""
+
+        return [
+            Relation(rel_name, expressions)
+            for rel_name, expressions in self.relation_details.items()
+        ]
 
     def is_relation_binary(self, rel_name: str) -> bool:
         """Returns if a relation is a binary relation
