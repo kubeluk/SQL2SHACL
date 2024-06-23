@@ -1,6 +1,4 @@
-from typing import List
 from rdflib import Graph
-from sqlparse.sql import Token
 from iri_builder import Builder
 from sql.ddl import DDL
 from sql.relation import Relation
@@ -19,6 +17,7 @@ from shacl_provider import (
     MaxProp,
     InvMaxProp,
     InvProp,
+    Prop,
 )
 
 
@@ -31,34 +30,35 @@ class Shaper:
     """
 
     def __init__(self, iri_builder: Builder, ddl_manager: DDL):
-        self.shapes_graph = Graph()
-        self.iri_builder = iri_builder
-        self.ddl_manager = ddl_manager
-        self.relations = ddl_manager.get_relations()
+        self._shapes_graph = Graph()
+        self._iri_builder = iri_builder
+        self._ddl_manager = ddl_manager
+        self._relations = ddl_manager.relations
         self._unq_component_added = False
 
     def _handle_unique_tab_constraint(self, tab_constraint: TableUnique) -> None:
         """TODO"""
 
-        rel_name = tab_constraint.get_relation_name()
-        rel_uri = self.iri_builder.build_class_iri(rel_name)
+        rel_uri = self._iri_builder.build_class_iri(tab_constraint.relation_name)
         # TODO: are groups of columns used for primary keys really covered
         # by the custom SHACL SPARQL constraint from the paper?
         # -> otherwise skip here if len(col_uris) > 1 and print warning
         col_uris = [
-            self.iri_builder.build_attribute_iri(rel_name, col_name)
-            for col_name in tab_constraint.get_col_names()
+            self._iri_builder.build_attribute_iri(
+                tab_constraint.relation_name, col_name
+            )
+            for col_name in tab_constraint.column_names
         ]
 
-        self.shapes_graph += UnqTuple(rel_uri, *col_uris)
+        self._shapes_graph += UnqTuple(rel_uri, *col_uris)
 
     def _handle_foreign_key_tab_constraint(
         self, tab_constraint: TableForeignKey
     ) -> None:
         """TODO"""
 
-        rel_name = tab_constraint.get_relation_name()
-        col_names = tab_constraint.get_column_names()
+        rel_name = tab_constraint.relation_name
+        col_names = tab_constraint.column_names
 
         if len(col_names) > 1:
             print(
@@ -66,23 +66,26 @@ class Shaper:
             )
             return
 
-        referenced_rel_name = tab_constraint.get_referenced_relation_name()
-        referenced_col_names = tab_constraint.get_referenced_col_names()
-        rel_uri = self.iri_builder.build_class_iri(rel_name)
-        referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
-        path_obj_uri = self.iri_builder.build_foreign_key_iri(
-            rel_name, referenced_rel_name, col_names, referenced_col_names
+        rel_uri = self._iri_builder.build_class_iri(rel_name)
+        referenced_rel_uri = self._iri_builder.build_class_iri(
+            tab_constraint.referenced_relation_name
+        )
+        path_obj_uri = self._iri_builder.build_foreign_key_iri(
+            rel_name,
+            tab_constraint.referenced_relation_name,
+            col_names,
+            tab_constraint.referenced_column_names,
         )
 
-        if tab_constraint.is_not_null():
-            self.shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
+        if tab_constraint.is_not_null:
+            self._shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
         else:
-            self.shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
+            self._shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
 
-        if tab_constraint.is_unique():
-            self.shapes_graph += InvMaxProp(referenced_rel_uri, path_obj_uri, rel_uri)
+        if tab_constraint.is_unique:
+            self._shapes_graph += InvMaxProp(referenced_rel_uri, path_obj_uri, rel_uri)
         else:
-            self.shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
+            self._shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
 
     def _handle_table_constraint(self, tab_constraint: Constraint) -> None:
         """Handles expressions that start with a Token of ttype Keyword.
@@ -98,28 +101,26 @@ class Shaper:
             self._handle_foreign_key_tab_constraint(tab_constraint)
 
         else:
-            print(
-                f"<{tab_constraint.get_constraint_name()}> is not supported yet and will be skipped"
-            )
+            print(f"<{tab_constraint.name}> is not supported yet and will be skipped")
 
     def _handle_datatype_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        relation_name = col.get_relation_name()
-        col_name = col.get_name()
-        dtype_name = col.get_data_type()
+        relation_name = col.relation_name
+        col_name = col.name
+        dtype_name = col.data_type
 
-        rel_uri = self.iri_builder.build_class_iri(relation_name)
-        attribute_uri = self.iri_builder.build_attribute_iri(relation_name, col_name)
-        mapped_xmlschema_type_uri = self.iri_builder.build_datatype_iri(dtype_name)
+        rel_uri = self._iri_builder.build_class_iri(relation_name)
+        attribute_uri = self._iri_builder.build_attribute_iri(relation_name, col_name)
+        mapped_xmlschema_type_uri = self._iri_builder.build_datatype_iri(dtype_name)
 
         if col.has_unique_constraint():
-            self.shapes_graph += CrdData(
+            self._shapes_graph += CrdData(
                 rel_uri, attribute_uri, mapped_xmlschema_type_uri
             )
 
         else:
-            self.shapes_graph += MaxData(
+            self._shapes_graph += MaxData(
                 rel_uri, attribute_uri, mapped_xmlschema_type_uri
             )
 
@@ -128,19 +129,19 @@ class Shaper:
             unq_component = Graph().parse(
                 "src/components/unique_values_constraint.ttl", format="ttl"
             )
-            self.shapes_graph += unq_component
+            self._shapes_graph += unq_component
             self._unq_component_added = True
 
     def _handle_unique_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        if col.has_unique_constraint():
-            rel_name = col.get_relation_name()
-            col_name = col.get_name()
+        if col.has_unique_constraint:
+            rel_name = col.relation_name
+            col_name = col.name
 
-            self.shapes_graph += UnqTuple(
-                self.iri_builder.build_class_iri(rel_name),
-                self.iri_builder.build_attribute_iri(rel_name, col_name),
+            self._shapes_graph += UnqTuple(
+                self._iri_builder.build_class_iri(rel_name),
+                self._iri_builder.build_attribute_iri(rel_name, col_name),
             )
 
             self._ensure_unique_component()
@@ -148,29 +149,30 @@ class Shaper:
     def _handle_references_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        if col.has_references():
-            ref = col.get_references()
-            rel_name = col.get_relation_name()
-            referenced_rel_name = ref.get_referenced_rel_name()
-            col_name = ref.get_col_name()
-            referenced_col_name = ref.get_referenced_col_name()
-            rel_uri = self.iri_builder.build_class_iri(rel_name)
-            referenced_rel_uri = self.iri_builder.build_class_iri(referenced_rel_name)
-            path_obj_uri = self.iri_builder.build_foreign_key_iri(
-                rel_name, referenced_rel_name, [col_name], [referenced_col_name]
+        if col.has_reference:
+            ref = col.reference
+            rel_uri = self._iri_builder.build_class_iri(col.relation_name)
+            referenced_rel_uri = self._iri_builder.build_class_iri(
+                ref.referenced_relation_name
+            )
+            path_obj_uri = self._iri_builder.build_foreign_key_iri(
+                col.relation_name,
+                ref.referenced_relation_name,
+                [ref.column_name],
+                [ref.referenced_column_name],
             )
 
-            if col.has_not_null_constraint():
-                self.shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
+            if col.has_not_null_constraint:
+                self._shapes_graph += CrdProp(rel_uri, path_obj_uri, referenced_rel_uri)
             else:
-                self.shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
+                self._shapes_graph += MaxProp(rel_uri, path_obj_uri, referenced_rel_uri)
 
-            if col.has_unique_constraint():
-                self.shapes_graph += InvMaxProp(
+            if col.has_unique_constraint:
+                self._shapes_graph += InvMaxProp(
                     referenced_rel_uri, path_obj_uri, rel_uri
                 )
             else:
-                self.shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
+                self._shapes_graph += InvProp(referenced_rel_uri, path_obj_uri, rel_uri)
 
     def _handle_column_constraint(self, col: Column) -> None:
         """TODO"""
@@ -182,26 +184,71 @@ class Shaper:
     def _shape_relation(self, rel: Relation) -> None:
         """TODO"""
 
-        node_shape = Node(self.iri_builder.build_class_iri(rel.get_name()))
-        self.shapes_graph += node_shape
+        node_shape = Node(self._iri_builder.build_class_iri(rel.name))
+        self._shapes_graph += node_shape
 
         # TODO: add logging which expressions haven't been handled
-        for column in rel.get_columns():
+        for column in rel.columns:
             self._handle_column_constraint(column)
 
-        for table_constraint in rel.get_table_constraints():
+        for table_constraint in rel.table_constraints:
             self._handle_table_constraint(table_constraint)
 
-    def _shape_binary_relation(self, rel_name, expressions: List[List[Token]]) -> None:
-        """TODO"""
+    def _shape_binary_relation(self, rel: Relation) -> None:
+        """Adds the respective shapes for binary relations.
 
-        pass
+        Since the relation is classified as binary, the `foreign_key_constraints` property
+        either contains two `ColumnForeignKey` instances or one `TableForeignKey` instance.
+        In the case of a `TableForeignKey`, both referenced columns come from the same referenced relation.
+        """
+
+        fk_constraints = rel.foreign_key_constraints
+
+        if len(fk_constraints) == 2:  # column constraints
+            unique_properties = [fk.is_unique for fk in fk_constraints]
+            ref_rel_names = [fk.referenced_relation_name for fk in fk_constraints]
+            ref_col_names = [fk.referenced_column_name for fk in fk_constraints]
+
+        elif len(fk_constraints) == 1:  # table constraint
+            fk = fk_constraints[0]
+            unique_properties = [fk.is_unique, fk.is_unique]
+            ref_rel_names = [fk.referenced_relation_name, fk.referenced_relation_name]
+            ref_col_names = fk.referenced_column_names
+
+        else:
+            print(
+                f"""
+                    Something went wrong.
+                    Relation <{rel.name}> has been classified as binary,
+                    but does not contain the right amount of foreign key constraints.
+                """
+            )
+
+        # TODO
+        # rel_iri = self._iri_builder.build_class_iri()
+        # inv_rel_iri =
+        # path_iri =
+        # inv_path_iri =
+        # cls_iri =
+        # inv_cls_iri =
+
+        if unique_properties[0]:
+            self._shapes_graph += MaxProp()
+
+        else:
+            self._shapes_graph += Prop()
+
+        if unique_properties[1]:
+            self._shapes_graph += InvMaxProp()
+
+        else:
+            self._shapes_graph += InvProp()
 
     def shape_up(self) -> None:
         """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
-        for relation_ in self.relations:
-            if not self.ddl_manager.is_relation_binary(relation_.get_name()):
+        for relation_ in self._relations:
+            if not self._ddl_manager.is_relation_binary(relation_.name):
                 self._shape_relation(relation_)
 
             else:
@@ -210,4 +257,4 @@ class Shaper:
     def get_shapes(self) -> Graph:
         """TODO"""
 
-        return self.shapes_graph
+        return self._shapes_graph

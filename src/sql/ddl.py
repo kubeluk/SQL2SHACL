@@ -16,29 +16,28 @@ class DDL:
     """
 
     def __init__(self, ddl_script: str):
-        self.parsed = sqlparse.parse(ddl_script)
-        self.relation_details = self._break_down_statements()
-        self.relations = self._break_down_relations()
+        self._parsed = sqlparse.parse(ddl_script)
+        self._relation_details = self._break_down_statements()
+        self._relations = self._break_down_relations()
+        self._relations_dict = {rel.name: rel for rel in self._relations}
 
-    def get_relation_details(self) -> Dict[str, List[List[Token]]]:
+    @property
+    def relation_details(self) -> Dict[str, List[List[Token]]]:
         """TODO"""
 
-        return self.relation_details
+        return self._relation_details
 
-    def get_relation_names(self) -> List[str]:
+    @property
+    def relation_names(self) -> List[str]:
         """TODO"""
 
         return [rel_name for rel_name in self.relation_details.keys()]
 
-    def get_relations(self) -> List[Relation]:
+    @property
+    def relations(self) -> List[Relation]:
         """TODO"""
 
-        return self.relations
-
-    def get_relation_expressions(self, rel_name: str) -> List[List[Token]]:
-        """TODO"""
-
-        return self.relation_details[rel_name]
+        return self._relations
 
     @staticmethod
     def _is_punctuation_end_of_expression(
@@ -89,7 +88,7 @@ class DDL:
 
         relation_details = {}
 
-        for stmt in self.parsed:
+        for stmt in self._parsed:
             relation_name = None
             expressions = []
 
@@ -127,7 +126,18 @@ class DDL:
             for rel_name, expressions in self.relation_details.items()
         ]
 
-    def is_relation_binary(self, rel_name: str) -> bool:
+    def _is_other_relation_referencing(self, rel: Relation) -> bool:
+        """TODO"""
+
+        others = [other for other in self.relations if other.name != rel.name]
+
+        for other_ in others:
+            if rel.name in other_.referenced_relation_names:
+                return True
+
+        return False
+
+    def is_relation_binary(self, rel: Relation) -> bool:
         """Returns if a relation is a binary relation
 
         Informally, a relation R is a binary relation between two relations S and T if:
@@ -154,5 +164,16 @@ class DDL:
 
         [1] https://doi.org/10.1145/2187836.2187924
         """
+
+        if (
+            not rel.references_itself  # 1 (in combination with 2)
+            and rel.has_exactly_two_attributes  # 2
+            and rel.do_all_columns_form_primary_key  # 2
+            and rel.do_all_columns_reference  # 3, 4 (in combination with 2)
+            and not rel.has_column_involved_in_two_distinct_foreign_keys()  # 5, 6
+            and not rel.do_all_columns_form_foreign_key  # 7
+            and not self._is_other_relation_referencing(rel)  # 8
+        ):
+            return True
 
         return False

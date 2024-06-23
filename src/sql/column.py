@@ -7,19 +7,19 @@ from .constraint import ColumnForeignKey
 class Column:
 
     def __init__(self, parent, col_name: str, expression: List[Token]):
-        self.parent = parent
-        self.name = col_name
-        self.expression = expression
-        self.dtype = str(expression[0])
-        self.constraints = expression[1:]
-        self.unique, self.not_null, self.references = self._set_column_properties()
+        self._parent = parent
+        self._name = col_name
+        self._expression = expression
+        self._dtype = str(expression[0])
+        self._constraints = expression[1:]
+        self._unique, self._not_null, self._reference = self._set_column_properties()
 
     def _set_column_properties(self) -> Tuple[bool, bool, ColumnForeignKey]:
         unique = False
         not_null = False
-        references = None
+        reference = None
 
-        for idx, constraint_ in enumerate(self.constraints):
+        for idx, constraint_ in enumerate(self._constraints):
             if constraint_.match(Keyword, "UNIQUE"):
                 unique = True
 
@@ -31,49 +31,56 @@ class Column:
                 not_null = True
 
             if constraint_.match(Keyword, "REFERENCES"):
-                constraint_args = self.constraints[idx + 1 :]
+                constraint_args = self._constraints[idx + 1 :]
 
-                references = ColumnForeignKey(
+                reference = ColumnForeignKey(
                     self,
                     constraint_args,
                 )
 
-        return unique, not_null, references
+        return unique, not_null, reference
 
-    def get_name(self) -> str:
+    @property
+    def name(self) -> str:
         """TODO"""
 
-        return self.name
+        return self._name
 
-    def get_data_type(self) -> str:
+    @property
+    def data_type(self) -> str:
         """TODO"""
 
-        return self.dtype
+        return self._dtype
 
+    @property
     def has_unique_constraint(self) -> bool:
         """TODO"""
 
-        return self.unique
+        return self._unique
 
+    @property
     def has_not_null_constraint(self) -> bool:
         """TODO"""
 
-        return self.not_null
+        return self._not_null
 
-    def has_references(self) -> bool:
+    @property
+    def has_reference(self) -> bool:
         """TODO"""
 
-        if self.references is None:
+        if self._reference is None:
             return False
 
         return True
 
-    def get_references(self) -> ColumnForeignKey:
+    @property
+    def reference(self) -> ColumnForeignKey:
         """TODO"""
 
-        return self.references
+        return self._reference
 
-    def get_relation_name(self) -> str:
+    @property
+    def relation_name(self) -> str:
         """TODO"""
 
-        return self.parent.get_name()
+        return self._parent.name

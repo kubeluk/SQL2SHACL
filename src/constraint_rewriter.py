@@ -36,7 +36,7 @@ class ConstraintRewriter:
     def get_parsed_ddl(self) -> Dict[str, List[List[Token]]]:
         """TODO"""
 
-        return self.ddl_manager.get_relation_details()
+        return self.ddl_manager.relation_details
 
     def print_parsed_ddl(self) -> None:
         """TODO"""
