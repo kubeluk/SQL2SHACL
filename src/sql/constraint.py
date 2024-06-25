@@ -25,7 +25,7 @@ class Constraint:
 
 class TableUnique(Constraint):
 
-    def __init__(self, parent, expression: List[Token], name: str = "UNIQUE"):
+    def __init__(self, parent, name: str, expression: List[Token]):
         super().__init__(parent, name, expression)
         self._col_names = self._break_down_expression()
 
@@ -48,14 +48,14 @@ class TableUnique(Constraint):
 
 class TablePrimaryKey(TableUnique):
 
-    def __init__(self, parent, expression: List[Token]):
-        super().__init__(parent, expression, name="PRIMARY KEY")
+    def __init__(self, parent, name: str, expression: List[Token]):
+        super().__init__(parent, name, expression)
 
 
 class TableForeignKey(Constraint):
 
-    def __init__(self, parent, expression: List[Token]):
-        super().__init__(parent, "FOREIGN KEY", expression)
+    def __init__(self, parent, name: str, expression: List[Token]):
+        super().__init__(parent, name, expression)
         (
             self._unique,
             self._not_null,
@@ -125,8 +125,8 @@ class TableForeignKey(Constraint):
 
 class ColumnForeignKey(Constraint):
 
-    def __init__(self, parent, expression: List[Token]):
-        super().__init__(parent, "REFERENCES", expression)
+    def __init__(self, parent, name: str, expression: List[Token]):
+        super().__init__(parent, name, expression)
         self._col_name = parent.name
         self._referenced_rel_name, self._referenced_col_name = (
             self._break_down_expression()

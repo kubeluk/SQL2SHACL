@@ -12,7 +12,52 @@ from .constraint import (
 
 
 class Relation:
-    """TODO"""
+    """
+    ```
+    <table element list> ::=
+        <left paren> <table element> [ { <comma> <table element> }... ] <right paren>
+
+    <table element> ::=
+        <column definition>
+        | <table period definition>
+        | <table constraint definition>
+        | <like clause>
+
+    <column definition> ::=
+        <column name> [ <data type or domain name> ]
+        [ <default clause> | <identity column specification> | <generation clause>
+        | <system time period start column specification>
+        | <system time period end column specification> ]
+        [ <column constraint definition>... ]
+        [ <collate clause> ]
+
+    <table period definition> ::=
+        <system or application time period specification>
+        <left paren> <period begin column name> <comma> <period end column name> <right paren>
+
+    <system or application time period specification> ::=
+        <system time period specification>
+        | <application time period specification>
+
+    <system time period specification> ::=
+        PERIOD FOR SYSTEM_TIME
+
+    <table constraint definition> ::=
+        [ <constraint name definition> ] <table constraint>
+        [ <constraint characteristics> ]
+
+    <constraint name definition> ::=
+        CONSTRAINT <constraint name>
+
+    <table constraint> ::=
+        <unique constraint definition>
+        | <referential constraint definition>
+        | <check constraint definition>
+
+    <like clause> ::=
+        LIKE <table name> [ <like options> ]
+    ```
+    """
 
     def __init__(
         self,
@@ -223,24 +268,40 @@ class Relation:
 
         for expression_ in self._expressions:
             first_tkn = expression_[0]
-            first_tkn_name = str(first_tkn)
             other_tkns = expression_[1:]
 
             if first_tkn.match(Name, None):
-                cols.append(Column(self, first_tkn_name, other_tkns))
+                col_name = str(first_tkn)
+                cols.append(Column(self, col_name, other_tkns))
 
             if first_tkn.match(Keyword, None):
-                match first_tkn_name:
+                if str(first_tkn) == "CONSTRAINT":
+                    constraint_name = str(other_tkns[0])
+                    constraint_type = str(other_tkns[1])
+                    constraint_args = other_tkns[2:]
+
+                else:
+                    constraint_name = ""
+                    constraint_type = str(first_tkn)
+                    constraint_args = other_tkns
+
+                match constraint_type:
                     case "FOREIGN KEY":
-                        tab_constraints.append(TableForeignKey(self, other_tkns))
+                        tab_constraints.append(
+                            TableForeignKey(self, constraint_name, constraint_args)
+                        )
 
                     case "PRIMARY KEY":
-                        tab_constraints.append(TablePrimaryKey(self, other_tkns))
+                        tab_constraints.append(
+                            TablePrimaryKey(self, constraint_name, constraint_args)
+                        )
 
                     case "UNIQUE":
-                        tab_constraints.append(TableUnique(self, other_tkns))
+                        tab_constraints.append(
+                            TableUnique(self, constraint_name, constraint_args)
+                        )
 
                     case _:
-                        print(f"Skipping unknown constraint <{first_tkn}>")
+                        print(f"Skipping unknown constraint type <{constraint_type}>")
 
         return cols, tab_constraints
