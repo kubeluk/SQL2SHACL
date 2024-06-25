@@ -6,14 +6,6 @@ from .relation import Relation
 
 
 class DDL:
-    """TODO
-
-    ---
-    Token.Name:         column name
-    Token.Name.Builtin: data type
-    Token.Keyword:      constraint
-    Token.Punctuation:  parenthesis
-    """
 
     def __init__(self, ddl_script: str):
         self._parsed = sqlparse.parse(ddl_script)
@@ -84,7 +76,33 @@ class DDL:
         return [tkn for tkn in content if not tkn.is_whitespace]
 
     def _break_down_statements(self) -> Dict[str, List[List[Token]]]:
-        """TODO"""
+        """Parses table statements into table name and column expressions.
+
+        ```
+        <table definition> ::=
+            CREATE [ <table scope> ] TABLE <table name> <table contents source>
+            [ WITH <system versioning clause> ]
+            [ ON COMMIT <table commit action> ROWS ]
+
+        <table scope> ::=
+            <global or local> TEMPORARY
+
+        <global or local> ::=
+            GLOBAL
+            | LOCAL
+
+        <table contents source> ::=
+            <table element list>
+
+        <table element list> ::=
+            <left paren> <table element> [ { <comma> <table element> }... ] <right paren>
+        ```
+        ---
+        Token.Name:         column name
+        Token.Name.Builtin: data type
+        Token.Keyword:      constraint
+        Token.Punctuation:  parenthesis
+        """
 
         relation_details = {}
 
