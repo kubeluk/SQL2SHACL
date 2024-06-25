@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from sqlparse.sql import Token
 from sqlparse.tokens import Keyword, Name
-from src.utils.exceptions import MissingSQLDatatypeException
+from utils.exceptions import MissingSQLDatatypeException
 from .constraint import ColumnForeignKey
 
 
@@ -65,6 +65,7 @@ class Column:
 
                 reference = ColumnForeignKey(
                     self,
+                    "",
                     constraint_args,
                 )
 
