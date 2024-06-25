@@ -4,10 +4,21 @@ SQL2SHACL implements the constraint rewriting proposed in the paper "A Source-to
 
 ## General
 
-- SQL2SHACL is non-validating, meaning the user has to take care providing correct SQL syntax
+- SQL2SHACL is in principle non-validating, meaning the user has to take care providing correct SQL syntax
+- The intention is to provide hints when
+    - expressions are skipped due to containing wrong syntax
+    - important information is missing (e.g. missing data type for column)
 
 ### Supported SQL constraints
 
+The following column and table constraints are supported:
+- NOT NULL
+- UNIQUE
+- PRIMARY KEY
+- REFERENCES
+
+Caviats:
+- groups of attributes as foreign key reference are currently not supported
 - ...
 
 ### Supported SQL data types
@@ -37,7 +48,7 @@ See the mapping file (`src/components/sqldatatype2xmlschema.json`) for their res
 
 ### N-ary relations
 
-- currently only supports binary relations
+- currently only binary relations are supported
 
 ## References
 
