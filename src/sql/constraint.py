@@ -22,6 +22,44 @@ class Constraint:
 
         return self._parent.name
 
+    def _break_down_expression(self):
+        """
+        ```
+        <table constraint definition> ::=
+            [ <constraint name definition> ] <table constraint>
+            [ <constraint characteristics> ]
+
+        <table constraint> ::=
+            <unique constraint definition>
+            | <referential constraint definition>
+            | <check constraint definition>
+
+        <unique constraint definition> ::=
+            <unique specification> [ <unique null treatment> ]
+            <left paren> <unique column list> [ <comma> <without overlap specification> ] <right paren>
+            | UNIQUE <left paren> VALUE <right paren>
+
+        <unique specification> ::=
+            UNIQUE
+            | PRIMARY KEY
+
+        <unique column list> ::=
+            <column name list>
+
+        <referential constraint definition> ::=
+            FOREIGN KEY <left paren> <referencing column list> [ <comma> <referencing period specification> ] <right paren>
+            <references specification>
+
+        <references specification> ::=
+            REFERENCES <referenced table and columns>
+            [ MATCH <match type> ] [ <referential triggered action> ]
+
+        <referenced table and columns> ::=
+            <table name> [ <left paren> <referenced column list> [ <comma> <referenced period specification> ] <right paren> ]
+        """
+
+        pass  # see child classes
+
 
 class TableUnique(Constraint):
 
