@@ -1,5 +1,4 @@
 from rdflib import Graph
-from iri_builder import Builder
 from sql.ddl import DDL
 from sql.relation import Relation
 from sql.column import Column
@@ -8,7 +7,7 @@ from sql.constraint import (
     TableUnique,
     TableForeignKey,
 )
-from shacl_provider import (
+from shacl.shacl_provider import (
     Node,
     MaxData,
     CrdData,
@@ -19,6 +18,7 @@ from shacl_provider import (
     InvProp,
     Prop,
 )
+from .iri_builder import Builder
 
 
 class Shaper:
