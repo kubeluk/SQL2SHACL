@@ -1,7 +1,8 @@
 from typing import List, Tuple
 from sqlparse.sql import Token
-from sqlparse.tokens import Keyword, Name
+from sqlparse.tokens import Keyword
 from utils.exceptions import MissingSQLDatatypeException
+from shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 from .constraint import ColumnForeignKey
 
 
@@ -14,6 +15,14 @@ class Column:
         self._dtype, self._unique, self._not_null, self._reference = (
             self._set_column_properties()
         )
+
+    def _is_predefined_data_type(self, tkn: Token) -> bool:
+        print(tkn, tkn.ttype)
+        if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():
+            return True
+
+        else:
+            return False
 
     def _set_column_properties(self) -> Tuple[str, bool, bool, ColumnForeignKey]:
         """
@@ -119,21 +128,21 @@ class Column:
         not_null = False
         reference = None
 
-        for idx, constraint_ in enumerate(self._expression):
-            if constraint_.match(Name.Builtin, None):
-                dtype = str(constraint_)
+        for idx, tkn in enumerate(self._expression):
+            if self._is_predefined_data_type(tkn):
+                dtype = str(tkn)
 
-            if constraint_.match(Keyword, "UNIQUE"):
+            if tkn.match(Keyword, "UNIQUE"):
                 unique = True
 
-            if constraint_.match(Keyword, "NOT NULL"):
+            if tkn.match(Keyword, "NOT NULL"):
                 not_null = True
 
-            if constraint_.match(Keyword, "PRIMARY KEY"):
+            if tkn.match(Keyword, "PRIMARY KEY"):
                 unique = True
                 not_null = True
 
-            if constraint_.match(Keyword, "REFERENCES"):
+            if tkn.match(Keyword, "REFERENCES"):
                 constraint_args = self._expression[idx + 1 :]
 
                 reference = ColumnForeignKey(

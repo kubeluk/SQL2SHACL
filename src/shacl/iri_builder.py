@@ -58,7 +58,7 @@ class SequedaBuilder(Builder):
 
     def build_datatype_iri(self, dtype: str) -> URIRef:
         try:
-            mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype]
+            mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype.upper()]
         except KeyError:
             raise UnsupportedSQLDatatypeException(
                 f"SQL datatype <{dtype}> is not supported as of today."
