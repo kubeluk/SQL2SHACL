@@ -150,6 +150,9 @@ class Column:
                     constraint_args,
                 )
 
+            if tkn.match(Keyword, None):
+                print(f"Skipping unsupported SQL column constraint <{tkn}>")
+
         if dtype is None:
             raise MissingSQLDatatypeException(
                 f"For column <{self._name}> of relation <{self._parent.name}>"
