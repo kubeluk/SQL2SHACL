@@ -12,52 +12,6 @@ from .constraint import (
 
 
 class Relation:
-    """
-    ```
-    <table element list> ::=
-        <left paren> <table element> [ { <comma> <table element> }... ] <right paren>
-
-    <table element> ::=
-        <column definition>
-        | <table period definition>
-        | <table constraint definition>
-        | <like clause>
-
-    <column definition> ::=
-        <column name> [ <data type or domain name> ]
-        [ <default clause> | <identity column specification> | <generation clause>
-        | <system time period start column specification>
-        | <system time period end column specification> ]
-        [ <column constraint definition>... ]
-        [ <collate clause> ]
-
-    <table period definition> ::=
-        <system or application time period specification>
-        <left paren> <period begin column name> <comma> <period end column name> <right paren>
-
-    <system or application time period specification> ::=
-        <system time period specification>
-        | <application time period specification>
-
-    <system time period specification> ::=
-        PERIOD FOR SYSTEM_TIME
-
-    <table constraint definition> ::=
-        [ <constraint name definition> ] <table constraint>
-        [ <constraint characteristics> ]
-
-    <constraint name definition> ::=
-        CONSTRAINT <constraint name>
-
-    <table constraint> ::=
-        <unique constraint definition>
-        | <referential constraint definition>
-        | <check constraint definition>
-
-    <like clause> ::=
-        LIKE <table name> [ <like options> ]
-    ```
-    """
 
     def __init__(
         self,
@@ -261,7 +215,52 @@ class Relation:
     def _classify_expressions(
         self,
     ) -> Tuple[List[Column], List[Constraint]]:
-        """TODO"""
+        """
+        ```
+        <table element list> ::=
+            <left paren> <table element> [ { <comma> <table element> }... ] <right paren>
+
+        <table element> ::=
+            <column definition>
+            | <table period definition>
+            | <table constraint definition>
+            | <like clause>
+
+        <column definition> ::=
+            <column name> [ <data type or domain name> ]
+            [ <default clause> | <identity column specification> | <generation clause>
+            | <system time period start column specification>
+            | <system time period end column specification> ]
+            [ <column constraint definition>... ]
+            [ <collate clause> ]
+
+        <table period definition> ::=
+            <system or application time period specification>
+            <left paren> <period begin column name> <comma> <period end column name> <right paren>
+
+        <system or application time period specification> ::=
+            <system time period specification>
+            | <application time period specification>
+
+        <system time period specification> ::=
+            PERIOD FOR SYSTEM_TIME
+
+        <table constraint definition> ::=
+            [ <constraint name definition> ] <table constraint>
+            [ <constraint characteristics> ]
+
+        <constraint name definition> ::=
+            CONSTRAINT <constraint name>
+
+        <table constraint> ::=
+            <unique constraint definition>
+            | <referential constraint definition>
+            | <check constraint definition>
+
+        <like clause> ::=
+            LIKE <table name> [ <like options> ]
+        ```
+        """
 
         cols = []
         tab_constraints = []
