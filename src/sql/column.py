@@ -17,7 +17,6 @@ class Column:
         )
 
     def _is_predefined_data_type(self, tkn: Token) -> bool:
-        print(tkn, tkn.ttype)
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():
             return True
 
