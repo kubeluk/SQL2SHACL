@@ -273,7 +273,7 @@ class Relation:
                 col_name = str(first_tkn)
                 cols.append(Column(self, col_name, other_tkns))
 
-            if first_tkn.match(Keyword, None):
+            elif first_tkn.match(Keyword, None):
                 if str(first_tkn) == "CONSTRAINT":
                     constraint_name = str(other_tkns[0])
                     constraint_type = str(other_tkns[1])
@@ -302,5 +302,10 @@ class Relation:
 
                     case _:
                         print(f"Skipping unknown constraint type <{constraint_type}>")
+
+            else:
+                print(
+                    f"Skipping unknown table element, since <{first_tkn}> cannot be part of a valid SQL column or table constraint definition."
+                )
 
         return cols, tab_constraints
