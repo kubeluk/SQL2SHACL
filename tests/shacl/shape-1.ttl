@@ -28,3 +28,78 @@
         sh:nodeKind sh:IRI;
         sh:class :Prj
     ].
+
+:Prj a sh:NodeShape, rdfs:Class;
+    sh:property [
+        sh:path :Prj#P_id;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:integer
+    ]; 
+    uq:uniqueValuesForClass [ 
+        uq:unqProp :Prj#P_id;
+        uq:unqForClass :Prj 
+    ];
+    sh:property [
+        sh:path :Prj#Name;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:string
+    ];
+    sh:property [
+        sh:path :Prj#ToAcc;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:integer
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp :Prj#ToAcc;
+        uq:unqForClass :Prj
+    ];
+    sh:property [
+        sh:Path sh:inversePath[
+            :Asg#ToEmp,ToPrj,E_id,P_id
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class :Emp
+    ];
+    sh:property [
+        sh:path :Prj,Acc#ToAcc,A_id;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:class :Acc
+    ].
+
+:Acc a sh:NodeShape, rdfs:Class; 
+    sh:property [
+        sh:path :Acc#A_id;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:integer
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp :Acc#A_id;
+        uq:unqForClass :Acc
+    ];
+    sh:property [
+        sh: path :Acc#Name;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:datatype xsd:string
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp :Acc#Name;
+        uq:unqForClass :Acc
+    ];
+    sh:property [
+        sh:Path sh:inversePath[ 
+            :Prj,Acc#ToAcc,A_id
+        ];
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1;
+        sh:class :Prj ].
