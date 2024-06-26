@@ -114,20 +114,16 @@ class Column:
         ```
         """
 
-        if self._expression[0].match(Name.Builtin, None):
-            dtype = str(self._expression[0])
-
-        else:
-            raise MissingSQLDatatypeException(
-                f"Column <{self._name}> of relation <{self._parent.name}>"
-            )
-
+        constraints = self._expression[1:]
+        dtype = None
         unique = False
         not_null = False
         reference = None
 
-        constraints = self._expression[1:]
         for idx, constraint_ in enumerate(constraints):
+            if constraint_.match(Name.Builtin, None):
+                dtype = str(constraint_)
+
             if constraint_.match(Keyword, "UNIQUE"):
                 unique = True
 
@@ -146,6 +142,11 @@ class Column:
                     "",
                     constraint_args,
                 )
+
+        if dtype is None:
+            raise MissingSQLDatatypeException(
+                f"For column <{self._name}> of relation <{self._parent.name}>"
+            )
 
         return dtype, unique, not_null, reference
 
