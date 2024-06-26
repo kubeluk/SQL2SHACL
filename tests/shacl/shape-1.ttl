@@ -1,0 +1,30 @@
+:Emp a sh:NodeShape, rdfs:Class;
+    sh:property [
+        sh:path :Emp#E_id;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:integer
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp :Emp#E_id;
+        uq:unqForClass :Emp
+    ];
+    sh:property [
+        sh: path :Emp#Name;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:minCount 1;
+        sh:datatype xsd:string
+    ];
+    sh:property [
+        sh: path :Emp#Post;
+        sh:nodeKind sh:Literal;
+        sh:maxCount 1;
+        sh:datatype xsd:string 
+    ];
+    sh:property [
+        sh:path :Asg#ToEmp,ToPrj,E_id,P_id;
+        sh:nodeKind sh:IRI;
+        sh:class :Prj
+    ].
