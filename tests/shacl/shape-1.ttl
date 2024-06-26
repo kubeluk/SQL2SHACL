@@ -11,14 +11,14 @@
         uq:unqForClass :Emp
     ];
     sh:property [
-        sh: path :Emp#Name;
+        sh:path :Emp#Name;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:string
     ];
     sh:property [
-        sh: path :Emp#Post;
+        sh:path :Emp#Post;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string 
@@ -87,7 +87,7 @@
         uq:unqForClass :Acc
     ];
     sh:property [
-        sh: path :Acc#Name;
+        sh:path :Acc#Name;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string
@@ -102,4 +102,5 @@
         ];
         sh:nodeKind sh:IRI;
         sh:maxCount 1;
-        sh:class :Prj ].
+        sh:class :Prj
+    ].
