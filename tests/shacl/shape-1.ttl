@@ -1,73 +1,79 @@
+@prefix : <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+
 :Emp a sh:NodeShape, rdfs:Class;
     sh:property [
-        sh:path :Emp#E_id;
+        sh:path <http://example.org/Emp#E_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp :Emp#E_id;
+        uq:unqProp <http://example.org/Emp#E_id>;
         uq:unqForClass :Emp
     ];
     sh:property [
-        sh:path :Emp#Name;
+        sh:path <http://example.org/Emp#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:string
     ];
     sh:property [
-        sh:path :Emp#Post;
+        sh:path <http://example.org/Emp#Post>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string 
     ];
     sh:property [
-        sh:path :Asg#ToEmp,ToPrj,E_id,P_id;
+        sh:path <http://example.org/Asg#ToEmp,ToPrj,E_id,P_id>;
         sh:nodeKind sh:IRI;
         sh:class :Prj
     ].
 
 :Prj a sh:NodeShape, rdfs:Class;
     sh:property [
-        sh:path :Prj#P_id;
+        sh:path <http://example.org/Prj#P_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ]; 
     uq:uniqueValuesForClass [ 
-        uq:unqProp :Prj#P_id;
+        uq:unqProp <http://example.org/Prj#P_id>;
         uq:unqForClass :Prj 
     ];
     sh:property [
-        sh:path :Prj#Name;
+        sh:path <http://example.org/Prj#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:string
     ];
     sh:property [
-        sh:path :Prj#ToAcc;
+        sh:path <http://example.org/Prj#ToAcc>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp :Prj#ToAcc;
+        uq:unqProp <http://example.org/Prj#ToAcc>;
         uq:unqForClass :Prj
     ];
     sh:property [
-        sh:Path sh:inversePath[
-            :Asg#ToEmp,ToPrj,E_id,P_id
+        sh:path [
+            sh:inversePath <http://example.org/Asg#ToEmp,ToPrj,E_id,P_id>
         ];
         sh:nodeKind sh:IRI;
         sh:class :Emp
     ];
     sh:property [
-        sh:path :Prj,Acc#ToAcc,A_id;
+        sh:path <http://example.org/Prj,Acc#ToAcc,A_id>;
         sh:nodeKind sh:IRI;
         sh:maxCount 1;
         sh:minCount 1;
@@ -76,29 +82,29 @@
 
 :Acc a sh:NodeShape, rdfs:Class; 
     sh:property [
-        sh:path :Acc#A_id;
+        sh:path <http://example.org/Acc#A_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp :Acc#A_id;
+        uq:unqProp <http://example.org/Acc#A_id>;
         uq:unqForClass :Acc
     ];
     sh:property [
-        sh:path :Acc#Name;
+        sh:path <http://example.org/Acc#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp :Acc#Name;
+        uq:unqProp <http://example.org/Acc#Name>;
         uq:unqForClass :Acc
     ];
     sh:property [
-        sh:Path sh:inversePath[ 
-            :Prj,Acc#ToAcc,A_id
+        sh:path [
+            sh:inversePath <http://example.org/Prj,Acc#ToAcc,A_id>
         ];
         sh:nodeKind sh:IRI;
         sh:maxCount 1;
