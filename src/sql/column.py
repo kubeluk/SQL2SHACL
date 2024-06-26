@@ -114,13 +114,12 @@ class Column:
         ```
         """
 
-        constraints = self._expression[1:]
         dtype = None
         unique = False
         not_null = False
         reference = None
 
-        for idx, constraint_ in enumerate(constraints):
+        for idx, constraint_ in enumerate(self._expression):
             if constraint_.match(Name.Builtin, None):
                 dtype = str(constraint_)
 
@@ -135,7 +134,7 @@ class Column:
                 not_null = True
 
             if constraint_.match(Keyword, "REFERENCES"):
-                constraint_args = constraints[idx + 1 :]
+                constraint_args = self._expression[idx + 1 :]
 
                 reference = ColumnForeignKey(
                     self,
