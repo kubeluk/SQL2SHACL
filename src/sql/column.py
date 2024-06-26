@@ -16,6 +16,51 @@ class Column:
             self._set_column_properties()
         )
 
+    @property
+    def name(self) -> str:
+        """TODO"""
+
+        return self._name
+
+    @property
+    def data_type(self) -> str:
+        """TODO"""
+
+        return self._dtype
+
+    @property
+    def has_unique_constraint(self) -> bool:
+        """TODO"""
+
+        return self._unique
+
+    @property
+    def has_not_null_constraint(self) -> bool:
+        """TODO"""
+
+        return self._not_null
+
+    @property
+    def has_reference(self) -> bool:
+        """TODO"""
+
+        if self._reference is None:
+            return False
+
+        return True
+
+    @property
+    def reference(self) -> ColumnForeignKey:
+        """TODO"""
+
+        return self._reference
+
+    @property
+    def relation_name(self) -> str:
+        """TODO"""
+
+        return self._parent.name
+
     def _is_predefined_data_type(self, tkn: Token) -> bool:
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():
             return True
@@ -159,48 +204,3 @@ class Column:
             )
 
         return dtype, unique, not_null, reference
-
-    @property
-    def name(self) -> str:
-        """TODO"""
-
-        return self._name
-
-    @property
-    def data_type(self) -> str:
-        """TODO"""
-
-        return self._dtype
-
-    @property
-    def has_unique_constraint(self) -> bool:
-        """TODO"""
-
-        return self._unique
-
-    @property
-    def has_not_null_constraint(self) -> bool:
-        """TODO"""
-
-        return self._not_null
-
-    @property
-    def has_reference(self) -> bool:
-        """TODO"""
-
-        if self._reference is None:
-            return False
-
-        return True
-
-    @property
-    def reference(self) -> ColumnForeignKey:
-        """TODO"""
-
-        return self._reference
-
-    @property
-    def relation_name(self) -> str:
-        """TODO"""
-
-        return self._parent.name
