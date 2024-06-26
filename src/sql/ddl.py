@@ -3,6 +3,7 @@ from typing import List, Dict
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
 from sqlparse.tokens import Name, Punctuation, Keyword
 from .relation import Relation
+from .identifier import is_valid_identifier
 
 
 class DDL:
@@ -152,7 +153,7 @@ class DDL:
 
             for tkn in stmt.tokens:
                 if isinstance(tkn, Identifier):
-                    relation_name = tkn.get_real_name()
+                    relation_name = str(tkn)
 
                 if isinstance(tkn, Parenthesis):
                     content = DDL._get_parenthesis_content(tkn)
@@ -172,7 +173,18 @@ class DDL:
                         else:
                             expression_.append(subtkn)
 
-            relation_details[relation_name] = expressions
+            if relation_name is None:
+                print(
+                    f"Skipping the following statement since it does not contain a relation name: <{str(stmt)}>"
+                )
+
+            elif not is_valid_identifier(relation_name):
+                print(
+                    f"Skipping the following statement since <{relation_name}> is not a valid SQL identifier: <{str(stmt)}>"
+                )
+
+            else:
+                relation_details[relation_name] = expressions
 
         return relation_details
 
