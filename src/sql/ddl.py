@@ -1,5 +1,5 @@
 import sqlparse
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
 from sqlparse.tokens import Name, Punctuation, Keyword
 from .relation import Relation
@@ -84,6 +84,34 @@ class DDL:
 
         return False
 
+    def _break_down_statement_(self, stmt: TokenList) -> Tuple[str, List[List[Token]]]:
+        relation_name = None
+        expressions = []
+
+        for tkn in stmt.tokens:
+            if isinstance(tkn, Identifier):
+                relation_name = str(tkn)
+
+            if isinstance(tkn, Parenthesis):
+                content = DDL._get_parenthesis_content(tkn)
+                expression_ = []
+
+                for subtkn in content:
+                    if DDL._is_end_of_parentesis_content(subtkn, content):
+                        expression_.append(subtkn)
+                        expressions.append(expression_)
+                        expression_ = []
+
+                    elif subtkn.match(Punctuation, ","):
+                        if DDL._is_punctuation_end_of_expression(subtkn, content):
+                            expressions.append(expression_)
+                            expression_ = []
+
+                    else:
+                        expression_.append(subtkn)
+
+        return relation_name, expressions
+
     def _break_down_statements(self) -> Dict[str, List[List[Token]]]:
         """Parses table statements into table name and column expressions.
 
@@ -148,30 +176,7 @@ class DDL:
                 )
                 continue
 
-            relation_name = None
-            expressions = []
-
-            for tkn in stmt.tokens:
-                if isinstance(tkn, Identifier):
-                    relation_name = str(tkn)
-
-                if isinstance(tkn, Parenthesis):
-                    content = DDL._get_parenthesis_content(tkn)
-                    expression_ = []
-
-                    for subtkn in content:
-                        if DDL._is_end_of_parentesis_content(subtkn, content):
-                            expression_.append(subtkn)
-                            expressions.append(expression_)
-                            expression_ = []
-
-                        elif subtkn.match(Punctuation, ","):
-                            if DDL._is_punctuation_end_of_expression(subtkn, content):
-                                expressions.append(expression_)
-                                expression_ = []
-
-                        else:
-                            expression_.append(subtkn)
+            relation_name, expressions = self._break_down_statement_(stmt)
 
             if relation_name is None:
                 print(
