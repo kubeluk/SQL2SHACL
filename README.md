@@ -17,7 +17,7 @@ The following column and table constraints are supported:
 - PRIMARY KEY
 - REFERENCES
 
-Caviats:
+Caveats:
 - groups of attributes as foreign key reference are currently not supported
 - ...
 
