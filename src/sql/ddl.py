@@ -1,7 +1,7 @@
 import sqlparse
 from typing import List, Dict
-from sqlparse.sql import Identifier, Parenthesis, Token, TokenList
-from sqlparse.tokens import Name, Punctuation
+from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
+from sqlparse.tokens import Name, Punctuation, Keyword
 from .relation import Relation
 
 
@@ -75,6 +75,14 @@ class DDL:
         content = list(parenthesis_tkn.flatten())[1:-1]
         return [tkn for tkn in content if not tkn.is_whitespace]
 
+    def _is_create_table_statement(self, stmt: Statement) -> bool:
+        if stmt.get_type() == "CREATE":
+            for token in stmt.tokens:
+                if token.match(Keyword, "TABLE"):
+                    return True
+
+        return False
+
     def _break_down_statements(self) -> Dict[str, List[List[Token]]]:
         """Parses table statements into table name and column expressions.
 
@@ -83,6 +91,32 @@ class DDL:
             CREATE [ <table scope> ] TABLE <table name> <table contents source>
             [ WITH <system versioning clause> ]
             [ ON COMMIT <table commit action> ROWS ]
+
+        <identifier> ::=
+            <actual identifier>
+
+        <actual identifier> ::=
+            <regular identifier>
+            | <delimited identifier>
+            | <Unicode delimited identifier>
+
+        <regular identifier> ::=
+            <identifier body>
+
+        <identifier body> ::=
+            <identifier start> [ <identifier part>... ]
+
+        <identifier part> ::=
+            <identifier start>
+            | <identifier extend>
+
+        <identifier start> ::=
+            An <identifier start> is any character in the Unicode General Category
+            classes “Lu”, “Ll”, “Lt”, “Lm”, “Lo”, or “Nl”
+
+        <identifier extend> ::=
+            An <identifier extend> is U+00B7, “Middle Dot”, or any character in the Unicode General Category
+            classes “Mn”, “Mc”, “Nd”, or “Pc”
 
         <table scope> ::=
             <global or local> TEMPORARY
@@ -107,6 +141,12 @@ class DDL:
         relation_details = {}
 
         for stmt in self._parsed:
+            if not self._is_create_table_statement(stmt):
+                print(
+                    f"Skipping the following statement as it does not seem to be a DDL 'CREATE TABLE' statement: <{str(stmt)}>"
+                )
+                continue
+
             relation_name = None
             expressions = []
 
