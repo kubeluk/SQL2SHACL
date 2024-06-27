@@ -29,18 +29,20 @@ def main():
         );
     """
 
-    setup_logging(log_level=logging.INFO)
-
-    cr = ConstraintRewriter.setup(ddl_script)
+    setup_logging(log_level=logging.INFO, log_file="out/rewriting.log")
+    logger = logging.getLogger(__name__)
 
     try:
+        cr = ConstraintRewriter.setup(ddl_script, base_iri="http://example.org/")
         cr.rewrite()
-    except MissingSQLDatatypeException:
-        pass
 
-    # cr.print_parsed_ddl()
-    # print("\n" + (80 * "#") + "\n")
-    # cr.print_shapes()
+    except MissingSQLDatatypeException:
+        logger.error("It seems there are missing data types in the column definitions")
+
+    else:
+        # cr.print_parsed_ddl()
+        # cr.print_shapes()
+        cr.write_shapes("out/shapes_graph.ttl")
 
 
 if __name__ == "__main__":

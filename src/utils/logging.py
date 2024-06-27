@@ -3,14 +3,15 @@ import logging.config
 
 
 def setup_logging(log_level=logging.INFO, log_file=None):
-    handlers = {
-        "console": {
+    handlers = {}
+
+    if not log_file:
+        handlers["console"] = {
             "level": log_level,
             "class": "logging.StreamHandler",
             "formatter": "standard",
             "stream": "ext://sys.stdout",
         }
-    }
 
     if log_file:
         handlers["file"] = {
