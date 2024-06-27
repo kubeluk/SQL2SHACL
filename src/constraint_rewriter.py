@@ -5,6 +5,7 @@ from rdflib import Graph
 from sqlparse.sql import Token
 from sql.ddl import DDL
 from shacl.shacl_shaper import Shaper
+from shacl.shacl_provider import UQ
 from shacl.iri_builder import Builder, SequedaBuilder
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,14 @@ class ConstraintRewriter:
     def serialize_shapes(self) -> str:
         """TODO"""
 
+        self.shapes_graph.bind("uq", UQ)
         return self.shapes_graph.serialize()
+
+    def write_shapes(self, path: str) -> None:
+        """TODO"""
+
+        with open(path, "w") as file:
+            file.write(self.serialize_shapes())
 
     def print_shapes(self) -> str:
         """TODO"""
