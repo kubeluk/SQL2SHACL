@@ -1,9 +1,12 @@
+import logging
 import sqlparse
 from typing import List, Dict, Tuple
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
 from sqlparse.tokens import Name, Punctuation, Keyword
 from .relation import Relation
 from .identifier import is_valid_identifier
+
+logger = logging.getLogger(__name__)
 
 
 class DDL:
@@ -54,14 +57,22 @@ class DDL:
         """
 
         punct_idx = expression.index(punct)
-        tkn_before = expression[punct_idx - 1]
-        tkn_after = expression[punct_idx + 1]
+        surrounding_4_tkns = expression[punct_idx - 2 : punct_idx + 3]
 
-        # check if punctionation is surrounded by column names (= marks key constraint)
-        if tkn_before.match(Name, None) and tkn_after.match(Name, None):
+        if len(surrounding_4_tkns) < 4:
+            return True
+
+        # check if punctionation is surrounded by parentheses and column names (= marks key constraint)
+        elif (
+            surrounding_4_tkns[0].match(Punctuation, "(")
+            and surrounding_4_tkns[1].match(Name, None)
+            and surrounding_4_tkns[2].match(Name, None)
+            and surrounding_4_tkns[3].match(Punctuation, ")")
+        ):
             return False
 
-        return True
+        else:
+            return True
 
     @staticmethod
     def _is_end_of_parentesis_content(tkn: Token, tkn_list: List[Token]) -> bool:
@@ -171,7 +182,7 @@ class DDL:
 
         for stmt in self._parsed:
             if not self._is_create_table_statement(stmt):
-                print(
+                logger.warning(
                     f"Skipping the following statement as it does not seem to be a DDL 'CREATE TABLE' statement: <{str(stmt)}>"
                 )
                 continue
@@ -179,12 +190,12 @@ class DDL:
             relation_name, expressions = self._break_down_statement_(stmt)
 
             if relation_name is None:
-                print(
+                logger.warning(
                     f"Skipping the following statement since it does not contain a relation name: <{str(stmt)}>"
                 )
 
             elif not is_valid_identifier(relation_name):
-                print(
+                logger.warning(
                     f"Skipping the following statement since <{relation_name}> is not a valid SQL identifier: <{str(stmt)}>"
                 )
 
