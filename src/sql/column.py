@@ -1,3 +1,4 @@
+import logging
 from typing import List, Tuple
 from sqlparse.sql import Token
 from sqlparse.tokens import Keyword
@@ -5,10 +6,13 @@ from utils.exceptions import MissingSQLDatatypeException
 from shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 from .constraint import ColumnForeignKey
 
+logger = logging.getLogger(__name__)
+
 
 class Column:
 
     def __init__(self, parent, col_name: str, expression: List[Token]):
+        logger.info(f"with column <{col_name}>")
         self._parent = parent
         self._name = col_name
         self._expression = expression
@@ -175,18 +179,22 @@ class Column:
         for idx, tkn in enumerate(self._expression):
             if self._is_predefined_data_type(tkn):
                 dtype = str(tkn)
+                logger.info(f"that has data type: <{dtype}> ")
 
-            if tkn.match(Keyword, "UNIQUE"):
+            elif tkn.match(Keyword, "UNIQUE"):
                 unique = True
+                logger.info("that has <UNIQUE> column constraint")
 
-            if tkn.match(Keyword, "NOT NULL"):
+            elif tkn.match(Keyword, "NOT NULL"):
                 not_null = True
+                logger.info("that has <NOT NULL> column constraint")
 
-            if tkn.match(Keyword, "PRIMARY KEY"):
+            elif tkn.match(Keyword, "PRIMARY KEY"):
                 unique = True
                 not_null = True
+                logger.info("that has <PRIMARY KEY> column constraint")
 
-            if tkn.match(Keyword, "REFERENCES"):
+            elif tkn.match(Keyword, "REFERENCES"):
                 constraint_args = self._expression[idx + 1 :]
 
                 reference = ColumnForeignKey(
@@ -195,12 +203,18 @@ class Column:
                     constraint_args,
                 )
 
-            if tkn.match(Keyword, None):
-                print(f"Skipping unsupported SQL column constraint <{tkn}>")
+            elif tkn.match(Keyword, None):
+                logger.warning(f"Skipping unsupported Keyword <{tkn}>")
+
+            else:
+                continue
 
         if dtype is None:
+            logger.error(
+                f"Column <{self._name}> of relation <{self._parent.name} does not contain a data type"
+            )
             raise MissingSQLDatatypeException(
-                f"For column <{self._name}> of relation <{self._parent.name}>"
+                f"Column <{self._name}> of relation <{self._parent.name}>"
             )
 
         return dtype, unique, not_null, reference

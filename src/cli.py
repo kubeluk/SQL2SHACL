@@ -1,8 +1,11 @@
 # TODO: build command-line functionality
-
+import logging
 from constraint_rewriter import ConstraintRewriter
+from utils.exceptions import MissingSQLDatatypeException
+from utils.logging import setup_logging
 
-if __name__ == "__main__":
+
+def main():
     ddl_script = """
         CREATE TABLE Emp (
             E_id integer PRIMARY KEY,
@@ -25,9 +28,20 @@ if __name__ == "__main__":
             PRIMARY KEY (ToEmp, ToPrj)
         );
     """
+
+    setup_logging(log_level=logging.INFO)
+
     cr = ConstraintRewriter.setup(ddl_script)
-    cr.rewrite()
+
+    try:
+        cr.rewrite()
+    except MissingSQLDatatypeException:
+        pass
 
     # cr.print_parsed_ddl()
     # print("\n" + (80 * "#") + "\n")
-    cr.print_shapes()
+    # cr.print_shapes()
+
+
+if __name__ == "__main__":
+    main()

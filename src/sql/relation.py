@@ -1,3 +1,4 @@
+import logging
 from typing import List, Tuple, Union, Dict
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
@@ -10,6 +11,8 @@ from .constraint import (
     ColumnForeignKey,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class Relation:
 
@@ -18,6 +21,7 @@ class Relation:
         rel_name: str,
         expressions: List[List[Token]],
     ):
+        logger.info(f"Identified relation <{rel_name}>")
         self._name = rel_name
         self._expressions = expressions
         self._cols, self._tab_constraints = self._classify_expressions()
@@ -301,11 +305,13 @@ class Relation:
                         )
 
                     case _:
-                        print(f"Skipping unknown constraint type <{constraint_type}>")
+                        logger.warning(
+                            f"Skipping unsupported keyword <{constraint_type}>"
+                        )
 
             else:
-                print(
-                    f"Skipping unknown table element, since <{first_tkn}> cannot be part of a valid SQL column or table constraint definition."
+                logger.warning(
+                    f"Skipping unknown table element <{first_tkn}>, since it cannot be part of a valid SQL column or table constraint definition."
                 )
 
         return cols, tab_constraints
