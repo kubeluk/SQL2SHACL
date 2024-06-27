@@ -57,19 +57,18 @@ class DDL:
         """
 
         punct_idx = expression.index(punct)
-        surrounding_4_tkns = expression[punct_idx - 2 : punct_idx + 3]
-
-        if len(surrounding_4_tkns) < 4:
-            return True
 
         # check if punctionation is surrounded by parentheses and column names (= marks key constraint)
         if (
-            surrounding_4_tkns[0].match(Punctuation, "(")
-            and surrounding_4_tkns[1].match(Name, None)
-            and surrounding_4_tkns[2].match(Name, None)
-            and surrounding_4_tkns[3].match(Punctuation, ")")
+            expression[punct_idx - 2].match(Punctuation, "(")
+            and expression[punct_idx - 1].match(Name, None)
+            and expression[punct_idx + 1].match(Name, None)
+            and expression[punct_idx + 2].match(Punctuation, ")")
         ):
             return False
+
+        else:
+            return True
 
     @staticmethod
     def _is_end_of_parentesis_content(tkn: Token, tkn_list: List[Token]) -> bool:

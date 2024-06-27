@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List
 from pprint import pprint
 from rdflib import Graph
@@ -5,6 +6,8 @@ from sqlparse.sql import Token
 from sql.ddl import DDL
 from shacl.shacl_shaper import Shaper
 from shacl.iri_builder import Builder, SequedaBuilder
+
+logger = logging.getLogger(__name__)
 
 
 class ConstraintRewriter:
@@ -21,15 +24,14 @@ class ConstraintRewriter:
         base_iri: str = "http://to.do/",
         iri_builder: str = "Sequeda",
     ):
-        try:
-            ddl_manager = DDL(ddl_script)
-        except Exception:
-            raise Exception("The provided DDL file could not be parsed properly")
-
         if iri_builder == "Sequeda":
             iri_builder = SequedaBuilder(base_iri)
+
         else:
             raise ValueError("Unknown IRI builder provided")
+
+        logger.info("~~~ PARSING THE PROVIDED SQL SCRIPT ...")
+        ddl_manager = DDL(ddl_script)
 
         return cls(ddl_manager, iri_builder)
 
@@ -46,6 +48,7 @@ class ConstraintRewriter:
     def rewrite(self):
         """TODO"""
 
+        logger.info("~~~ REWRITING THE PARSED SQL CONSTRAINTS ...")
         shaper = Shaper(self.iri_builder, self.ddl_manager)
         shaper.shape_up()
         self.shapes_graph += shaper.get_shapes()

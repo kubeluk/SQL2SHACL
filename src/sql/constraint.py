@@ -1,6 +1,9 @@
+import logging
 from typing import List, Tuple
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword
+
+logger = logging.getLogger(__name__)
 
 
 class Constraint:
@@ -64,6 +67,7 @@ class Constraint:
 class TableUnique(Constraint):
 
     def __init__(self, parent, name: str, expression: List[Token]):
+        logger.info("with table constraint <UNIQUE>")
         super().__init__(parent, name, expression)
         self._col_names = self._break_down_expression()
 
@@ -87,12 +91,14 @@ class TableUnique(Constraint):
 class TablePrimaryKey(TableUnique):
 
     def __init__(self, parent, name: str, expression: List[Token]):
+        logger.info("with table constraint <PRIMARY KEY>")
         super().__init__(parent, name, expression)
 
 
 class TableForeignKey(Constraint):
 
     def __init__(self, parent, name: str, expression: List[Token]):
+        logger.info("with table constraint <FOREIGN KEY>")
         super().__init__(parent, name, expression)
         (
             self._unique,
@@ -164,6 +170,7 @@ class TableForeignKey(Constraint):
 class ColumnForeignKey(Constraint):
 
     def __init__(self, parent, name: str, expression: List[Token]):
+        logger.info("that has <REFERENCES> column constraint")
         super().__init__(parent, name, expression)
         self._col_name = parent.name
         self._referenced_rel_name, self._referenced_col_name = (
