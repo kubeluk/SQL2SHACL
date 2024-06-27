@@ -1,0 +1,38 @@
+@base <http://example.com/base/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+
+<IOUs> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:maxLength 20 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <IOUs#fname> ] ; 
+    sh:property [ sh:maxLength 20 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <IOUs#fname> ] ; 
+    sh:property [ sh:datatype xsd:double ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <IOUs#amount> ] . 
+
+<Lives> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:maxLength 20 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Lives#fname> ] ; 
+    sh:property [ sh:maxLength 20 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Lives#fname> ] ; 
+    sh:property [ sh:maxLength 20 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Lives#city> ] . 

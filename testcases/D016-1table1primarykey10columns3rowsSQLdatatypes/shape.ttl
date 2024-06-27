@@ -1,0 +1,82 @@
+@base <http://example.com/base/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+
+<Patient> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <Patient#ID> ] ; 
+    sh:property [ sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#FirstName> ] ; 
+    sh:property [ sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#LastName> ] ; 
+    sh:property [ sh:maxLength 6 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Sex> ] ; 
+    sh:property [ sh:datatype xsd:double ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Weight> ] ; 
+    sh:property [ sh:datatype xsd:double ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Height> ] ; 
+    sh:property [ sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#BirthDate> ] ; 
+    sh:property [ sh:datatype xsd:dateTime ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#EntranceDate> ] ; 
+    sh:property [ sh:datatype xsd:boolean ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#PaidInAdvance> ] ; 
+    sh:property [ sh:maxLength 200 ;
+        sh:datatype xsd:hexBinary ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Photo> ] ; 
+    uq:uniqueValuesForClass [
+        uq:unqProp <Patient#ID> ;
+        uq:unqForClass <Patient>
+    ] .
+
+uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path uq:uniqueValuesForClass
+    ] ; 
+    sh:nodeValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:select """
+            SELECT $this ?other
+            WHERE { 
+                FILTER NOT EXISTS {
+                    GRAPH $shapesGraph {
+                        $uniqueValuesForClass uq:unqProp ?prop
+                    }
+                    $this ?prop ? thisVal .
+                    ?other ?prop ?otherVal .
+                    FILTER (?thisVal != ?otherVal)
+                }
+                FILTER (?other != $this )
+                GRAPH $shapesGraph {
+                    $uniqueValuesForClass uq:unqForClass ?class
+                } 
+                ?other rdf:type $class .
+            }
+        """
+    ] .
