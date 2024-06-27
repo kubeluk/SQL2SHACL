@@ -1,0 +1,111 @@
+@base <http://example.com/base/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+
+<DEPT> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <DEPT#deptno> ] ; 
+    sh:property [ sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <DEPT#dname> ] ; 
+    sh:property [ sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <DEPT#loc> ] ; 
+    sh:property [
+        sh:path [
+            sh:inversePath <EMP#ref-deptno>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <EMP>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <DEPT#deptno> ;
+        uq:unqForClass <DEPT>
+    ] .
+
+<EMP> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <EMP#empno> ] ; 
+    sh:property [ sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#ename> ] ; 
+    sh:property [ sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#job> ] ; 
+    sh:property [ sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#etype> ] ; 
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#deptno> ] ; 
+    sh:property [
+        sh:path <EMP#ref-deptno> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <DEPT>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <EMP#empno> ;
+        uq:unqForClass <EMP>
+    ] .
+
+<LIKES> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#id> ] ; 
+    sh:property [ sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likeType> ] ; 
+    sh:property [ sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likedObj> ] .
+
+uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path uq:uniqueValuesForClass
+    ] ; 
+    sh:nodeValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:select """
+            SELECT $this ?other
+            WHERE { 
+                FILTER NOT EXISTS {
+                    GRAPH $shapesGraph {
+                        $uniqueValuesForClass uq:unqProp ?prop
+                    }
+                    $this ?prop ? thisVal .
+                    ?other ?prop ?otherVal .
+                    FILTER (?thisVal != ?otherVal)
+                }
+                FILTER (?other != $this )
+                GRAPH $shapesGraph {
+                    $uniqueValuesForClass uq:unqForClass ?class
+                } 
+                ?other rdf:type $class .
+            }
+        """
+    ] .
