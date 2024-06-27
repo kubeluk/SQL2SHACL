@@ -63,16 +63,13 @@ class DDL:
             return True
 
         # check if punctionation is surrounded by parentheses and column names (= marks key constraint)
-        elif (
+        if (
             surrounding_4_tkns[0].match(Punctuation, "(")
             and surrounding_4_tkns[1].match(Name, None)
             and surrounding_4_tkns[2].match(Name, None)
             and surrounding_4_tkns[3].match(Punctuation, ")")
         ):
             return False
-
-        else:
-            return True
 
     @staticmethod
     def _is_end_of_parentesis_content(tkn: Token, tkn_list: List[Token]) -> bool:
