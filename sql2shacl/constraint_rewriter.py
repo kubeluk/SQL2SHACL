@@ -58,7 +58,7 @@ class ConstraintRewriter:
         """TODO"""
 
         self.shapes_graph.bind("uq", UQ)
-        return self.shapes_graph.serialize()
+        return self.shapes_graph.serialize(format="ttl")
 
     def write_shapes(self, path: str) -> None:
         """TODO"""
