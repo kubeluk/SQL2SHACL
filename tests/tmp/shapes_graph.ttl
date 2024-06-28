@@ -1,0 +1,99 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/base/Acc> a rdfs:Class,
+        sh:NodeShape ;
+    uq:uniqueValuesForClass [ uq:unqForClass <http://example.org/base/Acc> ;
+            uq:unqProp <http://example.org/base/Acc#Name> ] ;
+    sh:property [ sh:class <http://example.org/base/Prj> ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:path [ sh:inversePath <http://example.org/base/Prj,Acc#ToAcc,A_id> ] ],
+        [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Acc#A_id> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Acc#Name> ] .
+
+<http://example.org/base/Emp> a rdfs:Class,
+        sh:NodeShape ;
+    uq:uniqueValuesForClass [ uq:unqForClass <http://example.org/base/Emp> ;
+            uq:unqProp <http://example.org/base/Emp#E_id> ],
+        [ uq:unqForClass <http://example.org/base/Emp> ;
+            uq:unqProp <http://example.org/base/Emp#E_id> ] ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Emp#Name> ],
+        [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Emp#E_id> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Emp#Post> ],
+        [ sh:class <http://example.org/base/Prj> ;
+            sh:nodeKind sh:IRI ;
+            sh:path <http://example.org/base/Asg> ] .
+
+<http://example.org/base/Prj> a rdfs:Class,
+        sh:NodeShape ;
+    uq:uniqueValuesForClass [ uq:unqForClass <http://example.org/base/Prj> ;
+            uq:unqProp <http://example.org/base/Prj#P_id> ],
+        [ uq:unqForClass <http://example.org/base/Prj> ;
+            uq:unqProp <http://example.org/base/Prj#ToAcc> ] ;
+    sh:property [ sh:class <http://example.org/base/Emp> ;
+            sh:nodeKind sh:IRI ;
+            sh:path [ sh:inversePath <http://example.org/base/Asg> ] ],
+        [ sh:class <http://example.org/base/Acc> ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:path <http://example.org/base/Prj,Acc#ToAcc,A_id> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Prj#Name> ],
+        [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Prj#P_id> ],
+        [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.org/base/Prj#ToAcc> ] .
+
+uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+    sh:nodeValidator [ a sh:SPARQLSelectValidator ;
+            sh:select """
+            SELECT $this ?other
+            WHERE { 
+                FILTER NOT EXISTS {
+                    GRAPH $shapesGraph {
+                        $uniqueValuesForClass uq:unqProp ?prop
+                    }
+                    $this ?prop ? thisVal .
+                    ?other ?prop ?otherVal .
+                    FILTER (?thisVal != ?otherVal)
+                }
+                FILTER (?other != $this )
+                GRAPH $shapesGraph {
+                    $uniqueValuesForClass uq:unqForClass ?class
+                } 
+                ?other rdf:type $class .
+            }
+        """ ] ;
+    sh:parameter [ sh:path uq:uniqueValuesForClass ] .
+
