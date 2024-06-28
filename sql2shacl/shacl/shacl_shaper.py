@@ -246,11 +246,13 @@ class Shaper:
         if len(fk_constraints) == 2:  # column constraints
             unique_properties = [fk.is_unique for fk in fk_constraints]
             ref_rel_names = [fk.referenced_relation_name for fk in fk_constraints]
+            ref_col_names = [fk.referenced_column_name for fk in fk_constraints]
 
         elif len(fk_constraints) == 1:  # table constraint
             fk = fk_constraints[0]
             unique_properties = [fk.is_unique, fk.is_unique]
             ref_rel_names = [fk.referenced_relation_name, fk.referenced_relation_name]
+            ref_col_names = fk_constraints.referenced_col_names
 
         else:
             print(
@@ -261,7 +263,13 @@ class Shaper:
                 """
             )
 
-        bin_rel_iri = self._iri_builder.build_class_iri(rel.name)
+        bin_rel_iri = self._iri_builder.build_foreign_key_iri_binary(
+            rel.name,
+            ref_rel_names[0],
+            ref_rel_names[1],
+            ref_col_names[0],
+            ref_col_names[1],
+        )
         ref_rel_1_iri = self._iri_builder.build_class_iri(ref_rel_names[0])
         ref_rel_2_iri = self._iri_builder.build_class_iri(ref_rel_names[1])
 

@@ -81,14 +81,12 @@ class SequedaBuilder(Builder):
         bin_rel_name: str,
         referenced_name: str,
         other_referenced_name: str,
-        referenced_attributes: List[str],
-        other_referenced_attributes: List[str],
+        referenced_attribute: List[str],
+        other_referenced_attribute: List[str],
     ) -> URIRef:
         referenced_name_part = referenced_name + "," + other_referenced_name
         referenced_attributes_part = (
-            ",".join(referenced_attributes)
-            + ","
-            + ",".join(other_referenced_attributes)
+            referenced_attribute + "," + other_referenced_attribute
         )
         return URIRef(
             self.base
