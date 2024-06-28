@@ -149,13 +149,24 @@ class Relation:
 
         return False
 
-    def has_table_primary_key_for_col(self, col: Column) -> bool:
+    def has_table_primary_key_constraint_with_col(self, col: Column) -> bool:
         """TODO"""
 
         for tab_constraint in self.table_constraints:
             if isinstance(tab_constraint, TablePrimaryKey):
                 if col.name in tab_constraint.column_names:
                     return True
+
+        return False
+
+    def has_table_unique_constraint_for_col(self, col: Column) -> bool:
+        """TODO"""
+
+        for tab_constraint in self.table_constraints:
+            if isinstance(tab_constraint, TablePrimaryKey):
+                if len(tab_constraint.column_names) == 0:
+                    if tab_constraint.column_names[0] == col.name:
+                        return True
 
         return False
 

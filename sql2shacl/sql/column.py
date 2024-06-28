@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 class Column:
 
     def __init__(self, parent, col_name: str, expression: List[Token]):
-        logger.info(f"with column <{col_name}>")
+        # TODO: how to enable typing without running in a circular import error? (i.e. "parent: Relation" needs ".relation import Relation")
         self._parent = parent
+        logger.info(f"with column <{col_name}>")
         self._name = col_name
         self._expression = expression
         self._dtype, self._unique, self._not_null, self._reference = (
             self._set_column_properties()
         )
+        self._has_been_handled_by_unique_tab_constraint = None
 
     @property
     def name(self) -> str:
@@ -68,6 +70,12 @@ class Column:
         """TODO"""
 
         return self._parent.name
+
+    @property
+    def has_been_handled_by_unique_table_constraint(self) -> bool:
+        """TODO"""
+
+        return self._parent.has_table_unique_constraint_for_col(self)
 
     def _is_predefined_data_type(self, tkn: Token) -> bool:
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():

@@ -146,7 +146,8 @@ class Shaper:
         attribute_uri = self._iri_builder.build_attribute_iri(relation_name, col_name)
         mapped_xmlschema_type_uri = self._iri_builder.build_datatype_iri(dtype_name)
 
-        if rel.has_table_primary_key_for_col(col):
+        if rel.has_table_primary_key_constraint_with_col(col):
+            # shape for this col has already been added by _handle_column_constraints
             return
 
         elif col.has_not_null_constraint:
@@ -171,7 +172,10 @@ class Shaper:
     def _handle_unique_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        if col.has_unique_constraint:
+        if (
+            not col.has_been_handled_by_unique_table_constraint
+            and col.has_unique_constraint
+        ):
             rel_name = col.relation_name
             col_name = col.name
 
