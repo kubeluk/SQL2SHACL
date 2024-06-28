@@ -93,7 +93,11 @@
         sh:class <TaskAssignments>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Department#ID>, <Department#name>, <Department#city> ;
+        uq:unqProp <Department#ID> ;
+        uq:unqForClass <Addresses>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqProp <Department#name>, <Department#city> ;
         uq:unqForClass <Addresses>
     ] .
 
