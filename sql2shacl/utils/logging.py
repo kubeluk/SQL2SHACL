@@ -1,5 +1,5 @@
 import logging
-import logging.config
+from logging.config import dictConfig
 
 
 def setup_logging(log_level=logging.INFO, log_file=None):
@@ -41,4 +41,4 @@ def setup_logging(log_level=logging.INFO, log_file=None):
         },
     }
 
-    logging.config.dictConfig(logging_config)
+    dictConfig(logging_config)

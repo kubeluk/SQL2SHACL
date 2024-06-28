@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List
 from rdflib import URIRef
-from utils.exceptions import UnsupportedSQLDatatypeException
+from ..utils.exceptions import UnsupportedSQLDatatypeException
 
-with open(Path("src/components") / "sqldatatype2xmlschema.json") as f:
+with open(Path("sql2shacl") / "components" / "sqldatatype2xmlschema.json") as f:
     SQLDTYPE_XMLSCHEMA_MAP = json.loads(f.read())
 
 
