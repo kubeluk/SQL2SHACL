@@ -4,41 +4,20 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-<Student> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <Student#LastName> ] ; 
-    uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
-        uq:unqForClass <Student>
-    ] .
-
 <Sport> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+    sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Sport#Description> ] ; 
+        sh:path <Sport#Name> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student#ref-Sport>
+            sh:inversePath <Student,Sport#Sport,ID>
         ];
         sh:nodeKind sh:IRI;
         sh:class <Student>
@@ -48,28 +27,30 @@
         uq:unqForClass <Sport>
     ] .
 
-<Student_Sport> a sh:NodeShape , rdfs:Class ;
+<Student> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Student> ] ; 
+        sh:path <Student#ID> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Student#Name> ] ; 
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Sport> ] ; 
+        sh:path <Student#Sport> ] ; 
     sh:property [
-        sh:path <Student_Sport#ID_Student> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Student>
-    ];
-    sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
+        sh:path <Student,Sport#Sport,ID> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Sport>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <Student#ID> ;
+        uq:unqForClass <Student>
     ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;

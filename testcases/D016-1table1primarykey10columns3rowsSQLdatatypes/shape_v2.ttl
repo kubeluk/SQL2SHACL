@@ -4,72 +4,55 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-<Student> a sh:NodeShape , rdfs:Class ;
+<Patient> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <Patient#ID> ] ; 
+    sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <Patient#FirstName> ] ; 
+    sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#LastName> ] ; 
+        sh:path <Patient#LastName> ] ; 
+    sh:property [ #sh:maxLength 6 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Sex> ] ; 
+    sh:property [ sh:datatype xsd:double ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Weight> ] ; 
+    sh:property [ sh:datatype xsd:double ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Height> ] ; 
+    sh:property [ sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#BirthDate> ] ; 
+    sh:property [ sh:datatype xsd:dateTime ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#EntranceDate> ] ; 
+    sh:property [ sh:datatype xsd:boolean ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#PaidInAdvance> ] ; 
+    sh:property [ #sh:maxLength 200 ;
+        sh:datatype xsd:hexBinary ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Patient#Photo> ] ; 
     uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
-        uq:unqForClass <Student>
-    ] .
-
-<Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <Sport#Description> ] ; 
-    sh:property [
-        sh:path [
-            sh:inversePath <Student#ref-Sport>
-        ];
-        sh:nodeKind sh:IRI;
-        sh:class <Student>
-    ];
-    uq:uniqueValuesForClass [
-        uq:unqProp <Sport#ID> ;
-        uq:unqForClass <Sport>
-    ] .
-
-<Student_Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Student> ] ; 
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Sport> ] ; 
-    sh:property [
-        sh:path <Student_Sport#ID_Student> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Student>
-    ];
-    sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Sport>
+        uq:unqProp <Patient#ID> ;
+        uq:unqForClass <Patient>
     ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;

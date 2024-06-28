@@ -4,73 +4,94 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-<Student> a sh:NodeShape , rdfs:Class ;
+<Target> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <Target#PK> ] ; 
+    sh:property [ #sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <Target#key1attr1> ] ; 
+    sh:property [ #sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#LastName> ] ; 
-    uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
-        uq:unqForClass <Student>
-    ] .
-
-<Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <Target#key1attr2> ] ; 
+    sh:property [ #sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Sport#Description> ] ; 
+        sh:path <Target#key2attr1> ] ; 
+    sh:property [ #sh:maxLength 4 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Target#key2attr2> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student#ref-Sport>
+            sh:inversePath <Source,Target#attrA,attrB,key2attr2,key2attr1>
         ];
         sh:nodeKind sh:IRI;
-        sh:class <Student>
+        sh:class <Source>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Sport#ID> ;
-        uq:unqForClass <Sport>
+        uq:unqProp <Target#PK>;
+        uq:unqForClass <Target>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqProp <Target#key1attr1>, <Target#key1attr2> ;
+        uq:unqForClass <Target>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqProp <Target#key2attr1>, <Target#key2attr2> ;
+        uq:unqForClass <Target>
     ] .
 
-<Student_Sport> a sh:NodeShape , rdfs:Class ;
+<Source> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Student> ] ; 
-    sh:property [ sh:datatype xsd:integer ;
+        sh:path <Source#ID> ] ; 
+    sh:property [ #sh:maxLength 5 ;
+        sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Sport> ] ; 
+        sh:path <Source#attrA> ] ; 
+    sh:property [ #sh:maxLength 5 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Source#attrB> ] ; 
     sh:property [
-        sh:path <Student_Sport#ID_Student> ;
+        sh:path <Source,Target#attrA,attrB,key2attr2,key2attr1> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
-        sh:class <Student>
+        sh:class <Target>
     ];
-    sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Sport>
+    uq:uniqueValuesForClass [
+        uq:unqProp <Source#ID> ;
+        uq:unqForClass <Source>
     ] .
+
+<LIKES> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#id> ] ; 
+    sh:property [ #sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likeType> ] ; 
+    sh:property [ #sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likedObj> ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
     sh:parameter [

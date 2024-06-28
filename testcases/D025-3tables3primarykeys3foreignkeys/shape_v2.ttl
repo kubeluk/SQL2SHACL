@@ -1,0 +1,270 @@
+@base <http://example.com/base/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix uq: <http://sirius−labs.no/shapes/unique#> .
+
+<Addresses> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <Addresses#ID> ] ; 
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Addresses#city> ] ; 
+    sh:property [ #sh:maxLength 2 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Addresses#state> ] ; 
+    sh:property [
+        sh:path [
+            sh:inversePath <People,Addresses#addr,ID>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <People>
+    ];
+    sh:property [
+        sh:path [
+            sh:inversePath <Department,People#manager,ID>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <Department>
+    ];
+    sh:property [
+        sh:path <People,Department#deptName,deptCity,name,city> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <Department>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <Addresses#ID> ;
+        uq:unqForClass <Addresses>
+    ] .
+
+<Department> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <Department#ID> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Department#name> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Department#city> ] ; 
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Department#manager> ] ; 
+    sh:property [
+        sh:path <Department,People#manager,ID> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <People>
+    ];
+    sh:property [
+        sh:path [
+            sh:inversePath <People,Department#deptName,deptCity,name,city>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <People>
+    ];
+    sh:property [
+        sh:path [
+            sh:inversePath <Projects,Department#deptName,deptCity,name,city>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <Projects>
+    ];
+    sh:property [
+        sh:path [
+            sh:inversePath <TaskAssignments,Department#deptName,deptCity,name,city>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <TaskAssignments>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <Department#ID> ;
+        uq:unqForClass <Addresses>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqProp <Department#name>, <Department#city> ;
+        uq:unqForClass <Addresses>
+    ] .
+
+<People> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <People#ID> ] ; 
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <People#fname> ] ; 
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <People#addr> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <People#deptName> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <People#deptCity> ] ; 
+    sh:property [
+        sh:path <People,Addresses#addr,ID> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <Addresses>
+    ];
+    sh:property [
+        sh:path [
+            sh:inversePath <Projects,People#lead,ID>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <Projects>
+    ]; 
+    sh:property [
+        sh:path [
+            sh:inversePath <TaskAssignments,People#worker,ID>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <TaskAssignments>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <People#ID> ;
+        uq:unqForClass <People>
+    ] .
+
+<Projects> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Projects#lead> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Projects#name> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Projects#deptName> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Projects#deptCity> ] ; 
+    sh:property [
+        sh:path [
+            sh:inversePath <TaskAssignments,Projects#project,deptName,deptCity,name,deptName,deptCity>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <TaskAssignments>
+    ]; 
+    sh:property [
+        sh:path <Projects,Department#deptName,deptCity,name,city> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <Department>
+    ];
+    sh:property [
+        sh:path <Projects,People#lead,ID> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <People>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <Projects#lead>, <Projects#name> ;
+        uq:unqForClass <Addresses>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqProp <Projects#name>, <Projects#deptName>, <Projects#deptCity> ;
+        uq:unqForClass <Addresses>
+    ] .
+
+<TaskAssignments> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path <TaskAssignments#worker> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <TaskAssignments#project> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <TaskAssignments#deptName> ] ; 
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <TaskAssignments#deptCity> ] ; 
+    sh:property [
+        sh:path <TaskAssignments,Projects#project,deptName,deptCity,name,deptName,deptCity> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <Projects>
+    ];
+    sh:property [
+        sh:path <TaskAssignments,Department#deptName,deptCity,name,city> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <Department>
+    ];
+   sh:property [
+        sh:path <TaskAssignments,People#worker,ID> ;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1 ;
+        sh:class <People>
+    ];
+    uq:uniqueValuesForClass [
+        uq:unqProp <TaskAssignments#worker>, <TaskAssignments#project> ;
+        uq:unqForClass <Addresses>
+    ] .
+
+uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+    sh:parameter [
+        sh:path uq:uniqueValuesForClass
+    ] ; 
+    sh:nodeValidator [
+        a sh:SPARQLSelectValidator ;
+        sh:select """
+            SELECT $this ?other
+            WHERE { 
+                FILTER NOT EXISTS {
+                    GRAPH $shapesGraph {
+                        $uniqueValuesForClass uq:unqProp ?prop
+                    }
+                    $this ?prop ? thisVal .
+                    ?other ?prop ?otherVal .
+                    FILTER (?thisVal != ?otherVal)
+                }
+                FILTER (?other != $this )
+                GRAPH $shapesGraph {
+                    $uniqueValuesForClass uq:unqForClass ?class
+                } 
+                ?other rdf:type $class .
+            }
+        """
+    ] .
