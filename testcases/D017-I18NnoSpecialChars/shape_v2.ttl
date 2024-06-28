@@ -4,72 +4,62 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-<Student> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
+<植物> a sh:NodeShape , rdfs:Class ;
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <植物#名> ] ; 
+    sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <植物#使用部> ] ; 
+    sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#LastName> ] ; 
-    uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
-        uq:unqForClass <Student>
-    ] .
-
-<Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <Sport#Description> ] ; 
+        sh:path <植物#条件> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student#ref-Sport>
+            sh:inversePath <成分,植物#植物名,使用部,名,使用部>
         ];
         sh:nodeKind sh:IRI;
-        sh:class <Student>
+        sh:class <成分>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Sport#ID> ;
-        uq:unqForClass <Sport>
+        uq:unqProp <植物#名> , <植物#使用部> ;
+        uq:unqForClass <植物>
     ] .
 
-<Student_Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
+<成分> a sh:NodeShape , rdfs:Class ;
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <成分#皿> ] ; 
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Student> ] ; 
-    sh:property [ sh:datatype xsd:integer ;
+        sh:path <成分#植物名> ] ; 
+    sh:property [ #sh:maxLength 10 ;
+        sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Sport> ] ; 
+        sh:path <成分#使用部> ] ; 
     sh:property [
-        sh:path <Student_Sport#ID_Student> ;
+        sh:path <成分,植物#植物名,使用部,名,使用部> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
-        sh:class <Student>
+        sh:class <植物>
     ];
-    sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Sport>
+    uq:uniqueValuesForClass [
+        uq:unqProp <成分#植物名>, <成分#使用部> ;
+        uq:unqForClass <成分>
     ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;

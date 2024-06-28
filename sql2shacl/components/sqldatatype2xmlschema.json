@@ -1,17 +1,17 @@
 {
-    "BINARY": "http://www.w3.org/2001/XMLSchema#base64Binary",
-    "BINARY VARYING": "http://www.w3.org/2001/XMLSchema#base64Binary",
-    "VARBINARY": "http://www.w3.org/2001/XMLSchema#base64Binary",
-    "BINARY LARGE OBJECT": "http://www.w3.org/2001/XMLSchema#base64Binary",
-    "BLOB": "http://www.w3.org/2001/XMLSchema#base64Binary",
+    "BINARY": "http://www.w3.org/2001/XMLSchema#hexBinary",
+    "BINARY VARYING": "http://www.w3.org/2001/XMLSchema#hexBinary",
+    "VARBINARY": "http://www.w3.org/2001/XMLSchema#hexBinary",
+    "BINARY LARGE OBJECT": "http://www.w3.org/2001/XMLSchema#hexBinary",
+    "BLOB": "http://www.w3.org/2001/XMLSchema#hexBinary",
     "NUMERIC": "http://www.w3.org/2001/XMLSchema#decimal",
     "DECIMAL": "http://www.w3.org/2001/XMLSchema#decimal",
     "DEC": "http://www.w3.org/2001/XMLSchema#decimal",
-    "SMALLINT": "http://www.w3.org/2001/XMLSchema#short",
+    "SMALLINT": "http://www.w3.org/2001/XMLSchema#integer",
     "INTEGER": "http://www.w3.org/2001/XMLSchema#integer",
     "INT": "http://www.w3.org/2001/XMLSchema#integer",
-    "BIGINT": "http://www.w3.org/2001/XMLSchema#long",
-    "FLOAT": "http://www.w3.org/2001/XMLSchema#float",
+    "BIGINT": "http://www.w3.org/2001/XMLSchema#integer",
+    "FLOAT": "http://www.w3.org/2001/XMLSchema#double",
     "REAL": "http://www.w3.org/2001/XMLSchema#double",
     "DOUBLE PRECISION": "http://www.w3.org/2001/XMLSchema#double",
     "DECFLOAT": "http://www.w3.org/2001/XMLSchema#double",
@@ -25,5 +25,6 @@
     "CLOB": "http://www.w3.org/2001/XMLSchema#string",
     "BOOLEAN": "http://www.w3.org/2001/XMLSchema#boolean",
     "DATE": "http://www.w3.org/2001/XMLSchema#date",
-    "TIME": "http://www.w3.org/2001/XMLSchema#time"
+    "TIME": "http://www.w3.org/2001/XMLSchema#time",
+    "TIMESTAMP": "http://www.w3.org/2001/XMLSchema#dateTime"
 }

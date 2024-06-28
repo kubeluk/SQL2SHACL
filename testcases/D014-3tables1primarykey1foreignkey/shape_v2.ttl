@@ -4,73 +4,85 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-<Student> a sh:NodeShape , rdfs:Class ;
+<DEPT> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <DEPT#deptno> ] ; 
+    sh:property [ #sh:maxLength 30 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
+        sh:path <DEPT#dname> ] ; 
+    sh:property [ #sh:maxLength 100 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Student#LastName> ] ; 
-    uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
-        uq:unqForClass <Student>
-    ] .
-
-<Sport> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <Sport#Description> ] ; 
+        sh:path <DEPT#loc> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student#ref-Sport>
+            sh:inversePath <EMP,DEPT#deptno,deptno>
         ];
         sh:nodeKind sh:IRI;
-        sh:class <Student>
+        sh:class <EMP>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Sport#ID> ;
-        uq:unqForClass <Sport>
+        uq:unqProp <DEPT#deptno> ;
+        uq:unqForClass <DEPT>
     ] .
 
-<Student_Sport> a sh:NodeShape , rdfs:Class ;
+<EMP> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Student> ] ; 
+        sh:path <EMP#empno> ] ; 
+    sh:property [ #sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#ename> ] ; 
+    sh:property [ #sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#job> ] ; 
+    sh:property [ #sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <EMP#etype> ] ; 
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <Student_Sport#ID_Sport> ] ; 
+        sh:path <EMP#deptno> ] ; 
     sh:property [
-        sh:path <Student_Sport#ID_Student> ;
+        sh:path <EMP,DEPT#deptno,deptno> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
-        sh:class <Student>
+        sh:class <DEPT>
     ];
-    sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Sport>
+    uq:uniqueValuesForClass [
+        uq:unqProp <EMP#empno> ;
+        uq:unqForClass <EMP>
     ] .
+
+<LIKES> a sh:NodeShape , rdfs:Class ;
+    sh:property [ sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#id> ] ; 
+    sh:property [ #sh:maxLength 30 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likeType> ] ; 
+    sh:property [ #sh:maxLength 100 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <LIKES#likedObj> ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
     sh:parameter [
