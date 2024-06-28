@@ -63,7 +63,7 @@ class ConstraintRewriter:
     def write_shapes(self, path: str) -> None:
         """TODO"""
 
-        with open(path) as file:
+        with open(path, "w") as file:
             file.write(self.serialize_shapes())
 
     def print_shapes(self) -> str:
