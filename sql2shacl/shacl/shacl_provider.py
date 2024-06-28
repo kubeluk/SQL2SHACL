@@ -106,15 +106,3 @@ class Node(Shape):
         super().__init__()
         self.g.add((rel, RDF.type, SH.NodeShape))
         self.g.add((rel, RDF.type, RDFS.Class))
-
-
-if __name__ == "__main__":
-    uri = URIRef("http://example.org/shapes#1")
-    n = Node(uri)
-    p = UnqTuple(uri, uri + "UNQ")
-
-    g = Graph()
-    g += n
-    g += p
-
-    print(g.serialize())
