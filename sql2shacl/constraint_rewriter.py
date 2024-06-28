@@ -3,10 +3,10 @@ from typing import Dict, List
 from pprint import pprint
 from rdflib import Graph
 from sqlparse.sql import Token
-from sql.ddl import DDL
-from shacl.shacl_shaper import Shaper
-from shacl.shacl_provider import UQ
-from shacl.iri_builder import Builder, SequedaBuilder
+from .sql.ddl import DDL
+from .shacl.shacl_shaper import Shaper
+from .shacl.shacl_provider import UQ
+from .shacl.iri_builder import Builder, SequedaBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class ConstraintRewriter:
     def setup(
         cls,
         ddl_script: str,
-        base_iri: str = "http://to.do/",
+        base_iri: str = "http://example.org/base/",
         iri_builder: str = "Sequeda",
     ):
         if iri_builder == "Sequeda":
@@ -63,7 +63,7 @@ class ConstraintRewriter:
     def write_shapes(self, path: str) -> None:
         """TODO"""
 
-        with open(path, "w") as file:
+        with open(path) as file:
             file.write(self.serialize_shapes())
 
     def print_shapes(self) -> str:

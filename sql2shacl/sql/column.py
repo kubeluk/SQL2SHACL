@@ -2,9 +2,9 @@ import logging
 from typing import List, Tuple
 from sqlparse.sql import Token
 from sqlparse.tokens import Keyword
-from utils.exceptions import MissingSQLDatatypeException
-from shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 from .constraint import ColumnForeignKey
+from ..utils.exceptions import MissingSQLDatatypeException
+from ..shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 
 logger = logging.getLogger(__name__)
 

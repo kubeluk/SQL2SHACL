@@ -1,13 +1,7 @@
 from rdflib import Graph
-from sql.ddl import DDL
-from sql.relation import Relation
-from sql.column import Column
-from sql.constraint import (
-    Constraint,
-    TableUnique,
-    TableForeignKey,
-)
-from shacl.shacl_provider import (
+from pathlib import Path
+from .iri_builder import Builder
+from .shacl_provider import (
     Node,
     MaxData,
     CrdData,
@@ -18,7 +12,14 @@ from shacl.shacl_provider import (
     InvProp,
     Prop,
 )
-from .iri_builder import Builder
+from ..sql.ddl import DDL
+from ..sql.relation import Relation
+from ..sql.column import Column
+from ..sql.constraint import (
+    Constraint,
+    TableUnique,
+    TableForeignKey,
+)
 
 
 class Shaper:
@@ -127,7 +128,8 @@ class Shaper:
     def _ensure_unique_component(self) -> None:
         if not self._unq_component_added:
             unq_component = Graph().parse(
-                "src/components/unique_values_constraint.ttl", format="ttl"
+                Path("sql2shacl") / "components" / "unique_values_constraint.ttl",
+                format="ttl",
             )
             self._shapes_graph += unq_component
             self._unq_component_added = True
