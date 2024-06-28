@@ -1,6 +1,5 @@
 """Rewrite SQL constraints to SHACL shapes"""
 
-import sys
 import logging
 import sql2shacl.constraint_rewriter as cr
 from sql2shacl.utils import logging as cr_logging
@@ -15,7 +14,6 @@ def rewrite(
     base_iri: str = "http://example.org/base/",
     log_level: int = logging.WARNING,
     log_file: str = None,
-    output_stream=sys.stdout,
 ) -> None:
 
     cr_logging.setup_logging(log_level, log_file)
