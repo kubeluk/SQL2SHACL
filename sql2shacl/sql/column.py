@@ -60,6 +60,10 @@ class Column:
         return self._reference
 
     @property
+    def relation(self):
+        return self._parent
+
+    @property
     def relation_name(self) -> str:
         """TODO"""
 

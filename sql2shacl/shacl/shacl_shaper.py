@@ -18,8 +18,10 @@ from ..sql.column import Column
 from ..sql.constraint import (
     Constraint,
     TableUnique,
+    TablePrimaryKey,
     TableForeignKey,
 )
+from ..utils.exceptions import ColumnNotFoundException
 
 
 class Shaper:
@@ -52,6 +54,30 @@ class Shaper:
         ]
 
         self._shapes_graph += UnqTuple(rel_uri, *col_uris)
+
+    def _handle_primary_key_tab_constraint(
+        self, tab_constraint: TablePrimaryKey
+    ) -> None:
+        """TODO"""
+
+        rel_name = tab_constraint.relation_name
+        rel_uri = self._iri_builder.build_class_iri(rel_name)
+
+        for col_name in tab_constraint.column_names:
+
+            dtype_name = tab_constraint.relation.get_column_by_name(col_name).data_type
+
+            if dtype_name is None:
+                raise ColumnNotFoundException(
+                    f"For <{col_name}> in PRIMARY KEY table constraint of relation <{rel_name}>"
+                )
+
+            attribute_uri = self._iri_builder.build_attribute_iri(rel_name, col_name)
+            mapped_xmlschema_type_uri = self._iri_builder.build_datatype_iri(dtype_name)
+
+            self._shapes_graph += CrdData(
+                rel_uri, attribute_uri, mapped_xmlschema_type_uri
+            )
 
     def _handle_foreign_key_tab_constraint(
         self, tab_constraint: TableForeignKey
@@ -95,7 +121,11 @@ class Shaper:
             PRIMARY KEY (ToEmp, ToPrj)
         """
 
-        if isinstance(tab_constraint, TableUnique):
+        if isinstance(tab_constraint, TablePrimaryKey):
+            self._handle_primary_key_tab_constraint(tab_constraint)
+            tab_constraint.relation.update_primary_key_table_constraint_containment()
+
+        elif isinstance(tab_constraint, TableUnique):
             self._handle_unique_tab_constraint(tab_constraint)
 
         elif isinstance(tab_constraint, TableForeignKey):
@@ -107,7 +137,8 @@ class Shaper:
     def _handle_datatype_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        relation_name = col.relation_name
+        rel = col.relation
+        relation_name = rel.name
         col_name = col.name
         dtype_name = col.data_type
 
@@ -115,7 +146,10 @@ class Shaper:
         attribute_uri = self._iri_builder.build_attribute_iri(relation_name, col_name)
         mapped_xmlschema_type_uri = self._iri_builder.build_datatype_iri(dtype_name)
 
-        if col.has_unique_constraint:
+        if rel.has_table_primary_key_for_col(col):
+            return
+
+        elif col.has_not_null_constraint:
             self._shapes_graph += CrdData(
                 rel_uri, attribute_uri, mapped_xmlschema_type_uri
             )
@@ -189,12 +223,11 @@ class Shaper:
         node_shape = Node(self._iri_builder.build_class_iri(rel.name))
         self._shapes_graph += node_shape
 
-        # TODO: add logging which expressions haven't been handled
-        for column in rel.columns:
-            self._handle_column_constraint(column)
-
         for table_constraint in rel.table_constraints:
             self._handle_table_constraint(table_constraint)
+
+        for column in rel.columns:
+            self._handle_column_constraint(column)
 
     def _shape_binary_relation(self, rel: Relation) -> None:
         """Adds the respective shapes for binary relations.

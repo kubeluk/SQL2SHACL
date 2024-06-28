@@ -20,6 +20,12 @@ class Constraint:
         return self._name
 
     @property
+    def relation(self):
+        """TODO"""
+
+        return self._parent
+
+    @property
     def relation_name(self) -> str:
         """TODO"""
 
