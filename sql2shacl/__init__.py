@@ -14,7 +14,7 @@ def rewrite(
     base_iri: str = "http://example.org/base/",
     log_level: int = logging.WARNING,
     log_file: str = None,
-) -> None:
+) -> str:
 
     cr_logging.setup_logging(log_level, log_file)
     logger = logging.getLogger(__name__)
