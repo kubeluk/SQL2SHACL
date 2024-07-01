@@ -1,9 +1,18 @@
 [tool.poetry]
 name = "sql2shacl"
 version = "0.1.0"
-description = ""
-authors = ["Lukas Kubelka <lukas.kubelka@student.kit.edu>"]
+description = "SQL2SHACL does constraint rewriting from SQL constraints to SHACL shapes."
+authors = [
+    "Lukas Kubelka <lukas.kubelka@student.kit.edu>",
+    "Xuemin Duan <xuemin.duan@kuleuven.be>"
+]
 readme = "README.md"
+license = "Apache-2.0"
+keywords = ["SQL", "SHACL", "RDF", "constraint rewriting"]
+
+[tool.poetry.urls]
+"Web Science @ KIT" = "https://websci.aifb.kit.edu/english/index.php"
+"DTAI @ KU Leuven" = "https://dtai.cs.kuleuven.be/"
 
 [tool.poetry.dependencies]
 python = "^3.10"
