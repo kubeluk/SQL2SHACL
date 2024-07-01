@@ -25,8 +25,7 @@ from io import TextIOWrapper
 def create_parser():
     parser = argparse.ArgumentParser(
         prog="sql2shacl",
-        description='Rewrite SQL constraints in FILE according to OPTIONS. Use "-" as FILE '
-        "to read from stdin.",
+        description="Rewrite SQL constraints in FILE according to OPTIONS",
         usage="%(prog)s  [OPTIONS] FILE, ...",
     )
 
