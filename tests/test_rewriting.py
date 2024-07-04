@@ -18,7 +18,6 @@ def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str):
     generated_shapes_graph_path = os.path.join(
         os.path.dirname(sql_path), "sql2shacl_shape.ttl"
     )
-    logger.debug(type(sql_path))
 
     with open(sql_path, "r") as file:
         sql = file.read()
