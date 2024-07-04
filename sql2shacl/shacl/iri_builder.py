@@ -96,22 +96,15 @@ class SequedaBuilder(Builder):
     def build_foreign_key_iri_binary(
         self,
         bin_rel_name: str,
-        referenced_name: str,
-        other_referenced_name: str,
-        referenced_attribute: List[str],
-        other_referenced_attribute: List[str],
+        col_name: str,
+        other_col_name: str,
+        referenced_col_name: str,
+        other_referenced_col_name: str,
     ) -> URIRef:
-        referenced_name_part = referenced_name + "," + other_referenced_name
-        referenced_attributes_part = (
-            referenced_attribute + "," + other_referenced_attribute
-        )
+        col_names = col_name + "," + other_col_name
+        referenced_col_names = referenced_col_name + "," + other_referenced_col_name
         return URIRef(
-            self.base
-            + bin_rel_name
-            + "#"
-            + referenced_name_part
-            + ","
-            + referenced_attributes_part
+            self.base + bin_rel_name + "#" + col_names + "," + referenced_col_names
         )
 
 

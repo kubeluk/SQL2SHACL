@@ -37,7 +37,6 @@ class Column:
         self._dtype, self._unique, self._not_null, self._reference = (
             self._set_column_properties()
         )
-        self._has_been_handled_by_unique_tab_constraint = None
 
     @property
     def name(self) -> str:
@@ -88,11 +87,11 @@ class Column:
 
         return self._parent.name
 
-    @property
-    def has_been_handled_by_unique_table_constraint(self) -> bool:
-        """TODO"""
+    def set_not_null(self, is_not_null: bool) -> None:
+        self._not_null = True
 
-        return self._parent.has_table_unique_constraint_for_col(self)
+    def set_unique(self, is_unique: bool) -> None:
+        self._unique = True
 
     def _is_predefined_data_type(self, tkn: Token) -> bool:
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():

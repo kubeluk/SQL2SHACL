@@ -42,7 +42,6 @@ class Relation:
         self._name = rel_name
         self._expressions = expressions
         self._cols, self._tab_constraints = self._classify_expressions()
-        self._table_primary_key_containment = None
 
     @property
     def name(self) -> str:
@@ -166,27 +165,6 @@ class Relation:
 
         return False
 
-    def has_table_primary_key_constraint_with_col(self, col: Column) -> bool:
-        """TODO"""
-
-        for tab_constraint in self.table_constraints:
-            if isinstance(tab_constraint, TablePrimaryKey):
-                if col.name in tab_constraint.column_names:
-                    return True
-
-        return False
-
-    def has_table_unique_constraint_for_col(self, col: Column) -> bool:
-        """TODO"""
-
-        for tab_constraint in self.table_constraints:
-            if isinstance(tab_constraint, TablePrimaryKey):
-                if len(tab_constraint.column_names) == 0:
-                    if tab_constraint.column_names[0] == col.name:
-                        return True
-
-        return False
-
     def get_column_by_name(self, col_name: str) -> Column:
         """TODO"""
 
@@ -195,11 +173,6 @@ class Relation:
                 return col
 
         return None
-
-    def update_primary_key_table_constraint_containment(self) -> None:
-        """TODO"""
-
-        self._table_primary_key_containment = True
 
     def _prepare_foreign_key_references_per_column(
         self,

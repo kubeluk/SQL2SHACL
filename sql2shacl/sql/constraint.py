@@ -131,34 +131,6 @@ class TableForeignKey(Constraint):
             self._referenced_col_names,
         ) = self._break_down_expression()
 
-    def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
-        """TODO"""
-
-        unique = False
-        not_null = False
-        col_names = []
-        referenced_rel_name = None
-        referenced_col_names = []
-
-        for idx, tkn in enumerate(self._expression):
-            if tkn.match(Keyword, "UNIQUE"):
-                unique = True
-
-            if tkn.match(Keyword, "NOT NULL"):
-                not_null = True
-
-            if tkn.match(Name, None):
-                col_names.append(str(tkn))
-
-            if tkn.match(Keyword, "REFERENCES"):
-                referenced_rel_name = self._expression[idx + 1]
-
-                for ref in self._expression[idx + 2 :]:
-                    if ref.match(Name, None):
-                        referenced_col_names.append(ref)
-
-        return not_null, unique, col_names, referenced_rel_name, referenced_col_names
-
     @property
     def column_names(self) -> List[str]:
         """TODO"""
@@ -189,6 +161,34 @@ class TableForeignKey(Constraint):
 
         return self._not_null
 
+    def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
+        """TODO"""
+
+        unique = False
+        not_null = False
+        col_names = []
+        referenced_rel_name = None
+        referenced_col_names = []
+
+        for idx, tkn in enumerate(self._expression):
+            if tkn.match(Keyword, "UNIQUE"):
+                unique = True
+
+            if tkn.match(Keyword, "NOT NULL"):
+                not_null = True
+
+            if tkn.match(Name, None):
+                col_names.append(str(tkn))
+
+            if tkn.match(Keyword, "REFERENCES"):
+                referenced_rel_name = self._expression[idx + 1]
+
+                for ref in self._expression[idx + 2 :]:
+                    if ref.match(Name, None):
+                        referenced_col_names.append(ref)
+
+        return not_null, unique, col_names, referenced_rel_name, referenced_col_names
+
 
 class ColumnForeignKey(Constraint):
 
@@ -199,6 +199,24 @@ class ColumnForeignKey(Constraint):
         self._referenced_rel_name, self._referenced_col_name = (
             self._break_down_expression()
         )
+
+    @property
+    def column_name(self) -> str:
+        return self._col_name
+
+    @property
+    def referenced_relation_name(self) -> str:
+        return self._referenced_rel_name
+
+    @property
+    def referenced_column_name(self) -> str:
+        return self._referenced_col_name
+
+    @property
+    def is_unique(self) -> bool:
+        """TODO"""
+
+        return self._parent.has_unique_constraint
 
     def _break_down_expression(self) -> None:
         """TODO
@@ -233,21 +251,3 @@ class ColumnForeignKey(Constraint):
                     break
 
         return referenced_rel_name, referenced_col_name
-
-    @property
-    def column_name(self) -> str:
-        return self._col_name
-
-    @property
-    def referenced_relation_name(self) -> str:
-        return self._referenced_rel_name
-
-    @property
-    def referenced_column_name(self) -> str:
-        return self._referenced_col_name
-
-    @property
-    def is_unique(self) -> bool:
-        """TODO"""
-
-        return self._parent.has_unique_constraint
