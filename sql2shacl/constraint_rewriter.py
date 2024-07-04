@@ -15,6 +15,7 @@ limitations under the License.
 
 """
 
+import os
 import logging
 from typing import Dict, List
 from pprint import pprint
@@ -77,10 +78,13 @@ class ConstraintRewriter:
         self.shapes_graph.bind("uq", UQ)
         return self.shapes_graph.serialize(format="ttl")
 
-    def write_shapes(self, path: str) -> None:
+    def write_shapes(self, file_path: str) -> None:
         """TODO"""
 
-        with open(path, "w") as file:
+        dir_path = os.path.dirname(file_path)
+        os.makedirs(dir_path, exist_ok=True)
+
+        with open(file_path, "w") as file:
             file.write(self.serialize_shapes())
 
     def print_shapes(self) -> str:
