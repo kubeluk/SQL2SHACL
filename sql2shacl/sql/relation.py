@@ -18,7 +18,7 @@ limitations under the License.
 import logging
 from typing import List, Tuple, Union, Dict
 from sqlparse.sql import Token
-from sqlparse.tokens import Name, Keyword
+from sqlparse.tokens import Name, Keyword, String
 from .column import Column
 from .constraint import (
     Constraint,
@@ -302,6 +302,12 @@ class Relation:
             if first_tkn.match(Name, None):
                 col_name = str(first_tkn)
                 cols.append(Column(self, col_name, other_tkns))
+
+            # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+            elif first_tkn.match(String.Symbol, None):
+                col_name = str(first_tkn).strip('"')
+                cols.append(Column(self, col_name, other_tkns))
+            #
 
             elif first_tkn.match(Keyword, None):
                 if str(first_tkn) == "CONSTRAINT":

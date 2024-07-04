@@ -1,0 +1,34 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.com/base/IOUs> a rdfs:Class,
+        sh:NodeShape ;
+    sh:property [ sh:datatype xsd:double ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/IOUs#amount> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/IOUs#fname> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/IOUs#lname> ] .
+
+<http://example.com/base/Lives> a rdfs:Class,
+        sh:NodeShape ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/Lives#city> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/Lives#fname> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:path <http://example.com/base/Lives#lname> ] .
+

@@ -20,6 +20,12 @@ poetry install
 
 ## Usage
 
+Activate the virtual environment:
+
+```
+poetry shell
+```
+
 Provide a file containing SQL DDL statements and apply the constraint rewriting:
 
 ```
@@ -42,6 +48,12 @@ Provide a custom base IRI:
 
 ```
 python -m sql2shacl --base-iri http://example.org/base/ path/to/file.sql
+```
+
+## Run tests
+
+```
+pytest tests/test_rewriting.py
 ```
 
 ## General

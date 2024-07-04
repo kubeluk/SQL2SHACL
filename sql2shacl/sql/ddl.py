@@ -202,6 +202,10 @@ class DDL:
 
             relation_name, expressions = self._break_down_statement_(stmt)
 
+            # needed for official W3C test cases (using quotes is not valid SQL sytax)
+            relation_name = relation_name.strip('"')
+            #
+
             if relation_name is None:
                 logger.warning(
                     f"Skipping the following statement since it does not contain a relation name: <{str(stmt)}>"
