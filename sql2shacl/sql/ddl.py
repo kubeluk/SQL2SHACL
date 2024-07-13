@@ -19,7 +19,7 @@ import logging
 import sqlparse
 from typing import List, Dict, Tuple
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
-from sqlparse.tokens import Name, Punctuation, Keyword
+from sqlparse.tokens import Name, Punctuation, Keyword, String
 from .relation import Relation
 from .identifier import is_valid_identifier
 
@@ -83,6 +83,16 @@ class DDL:
             and expression[punct_idx + 2].match(Punctuation, ")")
         ):
             return False
+
+        # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+        elif (
+            expression[punct_idx - 2].match(Punctuation, "(")
+            and expression[punct_idx - 1].match(String.Symbol, None)
+            and expression[punct_idx + 1].match(String.Symbol, None)
+            and expression[punct_idx + 2].match(Punctuation, ")")
+        ):
+            return False
+        #
 
         else:
             return True
