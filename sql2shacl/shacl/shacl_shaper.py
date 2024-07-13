@@ -99,7 +99,7 @@ class Shaper:
         col_names = tab_constraint.column_names
 
         if len(col_names) > 1:
-            print(
+            logger.warning(
                 f"Foreign keys that constrain and reference a group of columns (<{col_names}>) are not supported yet"
             )
             return
