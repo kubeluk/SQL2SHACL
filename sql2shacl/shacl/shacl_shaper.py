@@ -71,15 +71,15 @@ class Shaper:
             # TODO: are groups of columns used for primary keys really covered
             # by the custom SHACL SPARQL constraint from the paper?
             # -> otherwise skip here if len(col_uris) > 1 and print warning
+            rel_name = tab_constraint.relation_name
             col_uris = [
-                self._iri_builder.build_attribute_iri(
-                    tab_constraint.relation_name, col_name
-                )
+                self._iri_builder.build_attribute_iri(rel_name, col_name)
                 for col_name in tab_constraint.column_names
             ]
-            rel_uri = self._iri_builder.build_class_iri(tab_constraint.relation_name)
+            rel_uri = self._iri_builder.build_class_iri(rel_name)
 
             self._shapes_graph += UnqTuple.shape(rel_uri, *col_uris)
+            self._ensure_unique_component()
 
     def _handle_primary_key_tab_constraint(
         self, tab_constraint: TablePrimaryKey
@@ -195,7 +195,6 @@ class Shaper:
                 self._iri_builder.build_class_iri(rel_name),
                 self._iri_builder.build_attribute_iri(rel_name, col_name),
             )
-
             self._ensure_unique_component()
 
     def _handle_references_col_constraint(self, col: Column) -> None:
