@@ -19,7 +19,7 @@ import logging
 import sqlparse
 from typing import List, Dict, Tuple
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
-from sqlparse.tokens import Name, Punctuation, Keyword, String
+from sqlparse.tokens import Name, Punctuation, Keyword, String, Comment
 from .relation import Relation
 from .identifier import is_valid_identifier
 
@@ -131,6 +131,9 @@ class DDL:
                 expression_ = []
 
                 for subtkn in content:
+                    if subtkn.match(Comment.Single, None):
+                        continue
+
                     if DDL._is_end_of_parentesis_content(subtkn, content):
                         expression_.append(subtkn)
                         expressions.append(expression_)
