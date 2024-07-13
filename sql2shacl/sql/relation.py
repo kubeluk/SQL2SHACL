@@ -321,9 +321,12 @@ class Relation:
                     constraint_args = other_tkns
 
                 match constraint_type:
-                    case "FOREIGN KEY":
+                    # sqlparse 0.5.0 does not recognize 'FOREIGN KEY' as one Keyword, rather 'FOREIGN' and 'KEY' separately
+                    case "FOREIGN":
                         tab_constraints.append(
-                            TableForeignKey(self, constraint_name, constraint_args)
+                            TableForeignKey(
+                                self, constraint_name, constraint_args[1:]
+                            )  # skip 'KEY' keyword
                         )
 
                     case "PRIMARY KEY":
