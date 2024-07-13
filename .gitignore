@@ -164,3 +164,4 @@ cython_debug/
 # custom
 out
 tests/tmp/
+testcases/*/sql2shacl_shape.ttl
