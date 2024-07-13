@@ -10,12 +10,12 @@
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <Student#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+    sh:property [ # sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Student#FirstName> ] ; 
-    sh:property [ sh:maxLength 50 ;
+    sh:property [ # sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
@@ -23,7 +23,6 @@
     sh:property [
         sh:path <Student_Sport#ID_Student,ID_Sport,ID,ID> ;
         sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
         sh:class <Sport>
     ];
     uq:uniqueValuesForClass [
@@ -37,7 +36,7 @@
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <Sport#ID> ] ; 
-    sh:property [ sh:maxLength 50 ;
+    sh:property [ # sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
@@ -53,7 +52,6 @@
         uq:unqProp <Sport#ID> ;
         uq:unqForClass <Sport>
     ] .
-
 
 uq:UniqueValuesConstraintComponent
     a sh:ConstraintComponent ;

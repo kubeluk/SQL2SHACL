@@ -42,6 +42,7 @@ class Relation:
         self._name = rel_name
         self._expressions = expressions
         self._cols, self._tab_constraints = self._classify_expressions()
+        self._set_references_for_columns()
 
     @property
     def name(self) -> str:
@@ -74,7 +75,9 @@ class Relation:
         return [col.name for col in self.columns]
 
     @property
-    def foreign_key_column_constraints(self) -> List[Union[ColumnForeignKey, None]]:
+    def foreign_key_constraints(
+        self,
+    ) -> List[Union[ColumnForeignKey, TableForeignKey]]:
         """TODO"""
 
         return [col.reference for col in self.columns if col.reference is not None]
@@ -88,14 +91,6 @@ class Relation:
             for constraint in self.table_constraints
             if isinstance(constraint, TableForeignKey)
         ]
-
-    @property
-    def foreign_key_constraints(
-        self,
-    ) -> List[Union[Union[ColumnForeignKey, TableForeignKey], None]]:
-        """TODO"""
-
-        return self.foreign_key_column_constraints + self.foreign_key_table_constraints
 
     @property
     def referenced_relation_names(self) -> List[Union[str, None]]:
@@ -150,7 +145,7 @@ class Relation:
     def do_all_columns_reference(self) -> bool:
         """TODO"""
 
-        if all([col.reference is not None for col in self.columns]):
+        if all([col.has_reference for col in self.columns]):
             return True
 
         return False
@@ -164,6 +159,13 @@ class Relation:
                 return True
 
         return False
+
+    def _set_references_for_columns(self) -> None:
+        """TODO"""
+
+        for tab_constraint in self._tab_constraints:
+            if isinstance(tab_constraint, TableForeignKey):
+                tab_constraint._set_reference_for_columns()
 
     def get_column_by_name(self, col_name: str) -> Column:
         """TODO"""
@@ -326,7 +328,7 @@ class Relation:
                         tab_constraints.append(
                             TableForeignKey(
                                 self, constraint_name, constraint_args[1:]
-                            )  # skip 'KEY' keyword
+                            )  # skip 'KEY' keyword in constraint_args
                         )
 
                     case "PRIMARY KEY":

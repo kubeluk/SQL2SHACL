@@ -16,10 +16,10 @@ limitations under the License.
 """
 
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from sqlparse.sql import Token
 from sqlparse.tokens import Keyword
-from .constraint import ColumnForeignKey
+from .constraint import ColumnForeignKey, TableForeignKey
 from ..utils.exceptions import MissingSQLDatatypeException
 from ..shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 
@@ -72,7 +72,7 @@ class Column:
         return True
 
     @property
-    def reference(self) -> ColumnForeignKey:
+    def reference(self) -> Union[ColumnForeignKey, TableForeignKey]:
         """TODO"""
 
         return self._reference
@@ -92,6 +92,9 @@ class Column:
 
     def set_unique(self, is_unique: bool) -> None:
         self._unique = True
+
+    def set_reference(self, tab_constraint: TableForeignKey) -> None:
+        self._reference = tab_constraint
 
     def _is_predefined_data_type(self, tkn: Token) -> bool:
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():

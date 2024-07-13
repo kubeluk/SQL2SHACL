@@ -173,6 +173,15 @@ class TableForeignKey(Constraint):
 
         return self._not_null
 
+    def _set_reference_for_columns(self) -> None:
+        """Remarks that columns do reference.
+
+        This is needed for detecting binary relations."""
+
+        for col_name in self._col_names:
+            col = self._parent.get_column_by_name(col_name)
+            col.set_reference(self)
+
     def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
         """TODO"""
 

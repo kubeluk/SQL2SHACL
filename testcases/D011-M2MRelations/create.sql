@@ -10,7 +10,7 @@ CREATE TABLE "Sport" (
 CREATE TABLE "Student_Sport" (
 "ID_Student" integer,
 "ID_Sport" integer,
-PRIMARY KEY ("ID_Student","ID_Sport"),
+PRIMARY KEY ("ID_Student","ID_Sport"), -- Prop or MaxProp? is this UNQ_1(X, Q)?
 FOREIGN KEY ("ID_Student") REFERENCES "Student"("ID"),
 FOREIGN KEY ("ID_Sport") REFERENCES "Sport"("ID")
 );
