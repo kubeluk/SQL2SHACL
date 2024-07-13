@@ -57,10 +57,10 @@ class Builder(ABC):
     def build_foreign_key_iri_binary(
         self,
         bin_rel_name: str,
-        referenced_name: str,
-        other_referenced_name: str,
-        referenced_attributes: List[str],
-        other_referenced_attributes: List[str],
+        col_name: str,
+        other_col_name: str,
+        referenced_col_name: str,
+        other_referenced_col_name: str,
     ) -> URIRef:
         pass
 
