@@ -5,8 +5,18 @@
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
 <Employee> a sh:NodeShape , rdfs:Class ;
+    sh:property [
+        sh:datatype xsd:integer ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Employee#ID> ] ;
     sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Employee#Name> ] .
+        sh:path <Employee#FirstName> ] ;
+    sh:property [ #sh:maxLength 50 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        sh:maxCount 1 ;
+        sh:path <Employee#LastName> ] .

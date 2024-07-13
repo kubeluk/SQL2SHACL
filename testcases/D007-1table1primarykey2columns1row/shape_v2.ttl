@@ -20,24 +20,28 @@
         uq:unqForClass <Student>
     ] .
 
-uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+uq:UniqueValuesConstraintComponent
+    a sh:ConstraintComponent ;
     sh:parameter [
         sh:path uq:uniqueValuesForClass
     ] ; 
     sh:nodeValidator [
         a sh:SPARQLSelectValidator ;
         sh:select """
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX uq: <http://sirius−labs.no/shapes/unique#>
+
             SELECT $this ?other
             WHERE { 
                 FILTER NOT EXISTS {
                     GRAPH $shapesGraph {
                         $uniqueValuesForClass uq:unqProp ?prop
                     }
-                    $this ?prop ? thisVal .
+                    $this ?prop ?thisVal .
                     ?other ?prop ?otherVal .
                     FILTER (?thisVal != ?otherVal)
                 }
-                FILTER (?other != $this )
+                FILTER (?other != $this)
                 GRAPH $shapesGraph {
                     $uniqueValuesForClass uq:unqForClass ?class
                 } 
