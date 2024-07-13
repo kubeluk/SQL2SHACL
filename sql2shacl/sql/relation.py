@@ -18,7 +18,7 @@ limitations under the License.
 import logging
 from typing import List, Tuple, Union, Dict
 from sqlparse.sql import Token
-from sqlparse.tokens import Name, Keyword, String
+from sqlparse.tokens import Name, Keyword, String, Comment
 from .column import Column
 from .constraint import (
     Constraint,
@@ -343,6 +343,9 @@ class Relation:
                         logger.warning(
                             f"Skipping unsupported keyword <{constraint_type}>"
                         )
+
+            elif first_tkn.match(Comment.Single, None):
+                pass
 
             else:
                 logger.warning(
