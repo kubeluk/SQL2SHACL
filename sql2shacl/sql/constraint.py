@@ -18,7 +18,7 @@ limitations under the License.
 import logging
 from typing import List, Tuple
 from sqlparse.sql import Token
-from sqlparse.tokens import Name, Keyword
+from sqlparse.tokens import Name, Keyword, String
 
 logger = logging.getLogger(__name__)
 
@@ -90,9 +90,11 @@ class Constraint:
 class TableUnique(Constraint):
 
     def __init__(self, parent, name: str, expression: List[Token]):
-        logger.info("with table constraint <UNIQUE>")
+        if not isinstance(self, TablePrimaryKey):
+            logger.info("with table constraint <UNIQUE>")
         super().__init__(parent, name, expression)
         self._col_names = self._break_down_expression()
+        logger.info(f"for columns <{tuple(self._col_names)}>")
 
     def _break_down_expression(self) -> List[str]:
         """TODO"""
@@ -101,6 +103,13 @@ class TableUnique(Constraint):
         for tkn in self._expression:
             if tkn.match(Name, None):
                 col_names.append(str(tkn))
+
+            # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+            if tkn.match(String.Symbol, None):
+                col_name = str(tkn).strip('"')
+                col_names.append(col_name)
+            #
+            # TODO: do this for all constraints that mention column or relation names
 
         return col_names
 
@@ -130,6 +139,9 @@ class TableForeignKey(Constraint):
             self._referenced_rel_name,
             self._referenced_col_names,
         ) = self._break_down_expression()
+        logger.info(
+            f"for columns <{tuple(self._col_names)}> referencing columns <{tuple(self._referenced_col_names)}> of relation <{self._referenced_rel_name}>"
+        )
 
     @property
     def column_names(self) -> List[str]:
@@ -180,12 +192,26 @@ class TableForeignKey(Constraint):
             if tkn.match(Name, None):
                 col_names.append(str(tkn))
 
+            # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+            if tkn.match(String.Symbol, None):
+                col_names.append(str(tkn).strip('"'))
+            #
+
             if tkn.match(Keyword, "REFERENCES"):
-                referenced_rel_name = self._expression[idx + 1]
+                referenced_rel_name = str(self._expression[idx + 1])
+
+                # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+                referenced_rel_name = referenced_rel_name.strip('"')
+                #
 
                 for ref in self._expression[idx + 2 :]:
                     if ref.match(Name, None):
-                        referenced_col_names.append(ref)
+                        referenced_col_names.append(str(ref))
+
+                    if ref.match(String.Symbol, None):
+                        referenced_col_names.append(str(ref).strip('"'))
+
+                break
 
         return not_null, unique, col_names, referenced_rel_name, referenced_col_names
 
@@ -198,6 +224,9 @@ class ColumnForeignKey(Constraint):
         self._col_name = parent.name
         self._referenced_rel_name, self._referenced_col_name = (
             self._break_down_expression()
+        )
+        logger.info(
+            f"referencing column <{self._referenced_col_name}> of relation <{self._referenced_rel_name}>"
         )
 
     @property
@@ -239,8 +268,16 @@ class ColumnForeignKey(Constraint):
         """
         referenced_rel_name = str(self._expression[0])
 
+        # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+        referenced_rel_name = referenced_rel_name.strip('"')
+        #
+
         if len(self._expression) == 1:
             referenced_col_name = self._col_name
+
+            # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
+            referenced_col_name = referenced_col_name.strip('"')
+            #
 
         else:
             parenthesis_content = self._expression[1:]
@@ -248,6 +285,10 @@ class ColumnForeignKey(Constraint):
             for tkn in parenthesis_content:
                 if tkn.match(Name, None):
                     referenced_col_name = str(tkn)
+                    break
+
+                if tkn.match(String.Symbol, None):
+                    referenced_col_name = str(tkn).strip('"')
                     break
 
         return referenced_rel_name, referenced_col_name
