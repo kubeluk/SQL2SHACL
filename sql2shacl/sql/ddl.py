@@ -70,43 +70,47 @@ class DDL:
         """Returns if punctionation is the end of an expression.
 
         This is the case in every column definition but the last one, e.g.:
+            ```
             CREATE TABLE Emp (
                 E_id integer PRIMARY KEY,
                 Name text NOT NULL,
                 Post text
-            );
+            )
+            ```
 
-        This is not the case when specifying key constraints, e.g.:
+        This is not the case when specifying table constraints, e.g.:
+            ```
             CREATE TABLE Asg (
                 ToEmp integer REFERENCES Emp (E_id),
                 ToPrj integer REFERENCES Prj (P_id),
                 PRIMARY KEY (ToEmp, ToPrj)
-            );
+            )
+            ```
+
+        or:
+            ```
+            CREATE TABLE Projects (
+                lead integer,
+                name text,
+                UNIQUE (lead, name),
+                deptName text,
+                deptCity text,
+                UNIQUE (name, deptName, deptCity)
+            )
+            ```
         """
 
         punct_idx = expression.index(punct)
+        next_tkn = expression[punct_idx + 1]
+        next_next_tkn = expression[punct_idx + 2]
 
-        # check if punctionation is surrounded by parentheses and column names (= marks key constraint)
-        if (
-            expression[punct_idx - 2].match(Punctuation, "(")
-            and expression[punct_idx - 1].match(Name, None)
-            and expression[punct_idx + 1].match(Name, None)
-            and expression[punct_idx + 2].match(Punctuation, ")")
-        ):
-            return False
+        if next_tkn.match(Name, None) or next_tkn.match(String.Symbol, None):
+            if next_next_tkn.match(Punctuation, ",") or next_next_tkn.match(
+                Punctuation, ")"
+            ):
+                return False
 
-        # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
-        elif (
-            expression[punct_idx - 2].match(Punctuation, "(")
-            and expression[punct_idx - 1].match(String.Symbol, None)
-            and expression[punct_idx + 1].match(String.Symbol, None)
-            and expression[punct_idx + 2].match(Punctuation, ")")
-        ):
-            return False
-        #
-
-        else:
-            return True
+        return True
 
     @staticmethod
     def _is_end_of_parentesis_content(tkn: Token, tkn_list: List[Token]) -> bool:

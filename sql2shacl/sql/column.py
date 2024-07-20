@@ -243,7 +243,7 @@ class Column:
 
         if dtype is None:
             logger.error(
-                f"Column <{self._name}> of relation <{self._parent.name} does not contain a data type"
+                f"Column <{self._name}> of relation <{self._parent.name}> does not contain a data type"
             )
             raise MissingSQLDatatypeException(
                 f"Column <{self._name}> of relation <{self._parent.name}>"
