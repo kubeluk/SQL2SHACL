@@ -15,17 +15,25 @@ limitations under the License.
 
 """
 
+from __future__ import annotations
+
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Union, TYPE_CHECKING
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword, String
+
+if TYPE_CHECKING:
+    from .relation import Relation
+    from .column import Column
 
 logger = logging.getLogger(__name__)
 
 
 class Constraint:
 
-    def __init__(self, parent, name: str, expression: List[Token]):
+    def __init__(
+        self, parent: Union[Relation, Column], name: str, expression: List[Token]
+    ):
         self._parent = parent
         self._name = name
         self._expression = expression
@@ -84,12 +92,12 @@ class Constraint:
             <table name> [ <left paren> <referenced column list> [ <comma> <referenced period specification> ] <right paren> ]
         """
 
-        pass  # see child classes
+        raise NotImplementedError("Use child class.")
 
 
 class TableUnique(Constraint):
 
-    def __init__(self, parent, name: str, expression: List[Token]):
+    def __init__(self, parent: Relation, name: str, expression: List[Token]):
         if not isinstance(self, TablePrimaryKey):
             logger.info("with table constraint <UNIQUE>")
         super().__init__(parent, name, expression)
@@ -122,19 +130,17 @@ class TableUnique(Constraint):
 
 class TablePrimaryKey(TableUnique):
 
-    def __init__(self, parent, name: str, expression: List[Token]):
+    def __init__(self, parent: Relation, name: str, expression: List[Token]):
         logger.info("with table constraint <PRIMARY KEY>")
         super().__init__(parent, name, expression)
 
 
 class TableForeignKey(Constraint):
 
-    def __init__(self, parent, name: str, expression: List[Token]):
+    def __init__(self, parent: Relation, name: str, expression: List[Token]):
         logger.info("with table constraint <FOREIGN KEY>")
         super().__init__(parent, name, expression)
         (
-            self._unique,  # TODO: not possible
-            self._not_null,  # TODO: not possible
             self._col_names,
             self._referenced_rel_name,
             self._referenced_col_names,
@@ -160,18 +166,6 @@ class TableForeignKey(Constraint):
         """TODO"""
 
         return self._referenced_col_names
-
-    @property
-    def is_unique(self) -> bool:
-        """TODO"""
-
-        return self._unique
-
-    @property
-    def is_not_null(self) -> bool:
-        """TODO"""
-
-        return self._not_null
 
     @property
     def all_referenced_columns_are_not_null(self) -> bool:
@@ -205,19 +199,11 @@ class TableForeignKey(Constraint):
     def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
         """TODO"""
 
-        unique = False
-        not_null = False
         col_names = []
         referenced_rel_name = None
         referenced_col_names = []
 
         for idx, tkn in enumerate(self._expression):
-            if tkn.match(Keyword, "UNIQUE"):
-                unique = True
-
-            if tkn.match(Keyword, "NOT NULL"):
-                not_null = True
-
             if tkn.match(Name, None):
                 col_names.append(str(tkn))
 
@@ -242,12 +228,12 @@ class TableForeignKey(Constraint):
 
                 break
 
-        return not_null, unique, col_names, referenced_rel_name, referenced_col_names
+        return col_names, referenced_rel_name, referenced_col_names
 
 
 class ColumnForeignKey(Constraint):
 
-    def __init__(self, parent, name: str, expression: List[Token]):
+    def __init__(self, parent: Column, name: str, expression: List[Token]):
         logger.info("that has <REFERENCES> column constraint")
         super().__init__(parent, name, expression)
         self._col_name = parent.name
@@ -269,12 +255,6 @@ class ColumnForeignKey(Constraint):
     @property
     def referenced_column_name(self) -> str:
         return self._referenced_col_name
-
-    @property
-    def is_unique(self) -> bool:
-        """TODO"""
-
-        return self._parent.has_unique_constraint
 
     def _break_down_expression(self) -> None:
         """TODO

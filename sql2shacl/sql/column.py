@@ -15,21 +15,25 @@ limitations under the License.
 
 """
 
+from __future__ import annotations
+
 import logging
-from typing import List, Tuple, Union
+from typing import List, Tuple, TYPE_CHECKING
 from sqlparse.sql import Token
 from sqlparse.tokens import Keyword
-from .constraint import ColumnForeignKey, TableForeignKey
+from .constraint import ColumnForeignKey
 from ..utils.exceptions import MissingSQLDatatypeException
 from ..shacl.iri_builder import SQLDTYPE_XMLSCHEMA_MAP
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from .relation import Relation
+
 
 class Column:
 
-    def __init__(self, parent, col_name: str, expression: List[Token]):
-        # TODO: how to enable typing without running in a circular import error? (i.e. "parent: Relation" needs ".relation import Relation")
+    def __init__(self, parent: Relation, col_name: str, expression: List[Token]):
         self._parent = parent
         logger.info(f"with column <{col_name}>")
         self._name = col_name
@@ -72,7 +76,7 @@ class Column:
         return True
 
     @property
-    def reference(self) -> Union[ColumnForeignKey, TableForeignKey]:
+    def reference(self) -> ColumnForeignKey:
         """TODO"""
 
         return self._reference
@@ -92,9 +96,6 @@ class Column:
 
     def set_unique(self, is_unique: bool) -> None:
         self._unique = True
-
-    def set_reference(self, tab_constraint: TableForeignKey) -> None:
-        self._reference = tab_constraint
 
     def _is_predefined_data_type(self, tkn: Token) -> bool:
         if str(tkn).upper() in SQLDTYPE_XMLSCHEMA_MAP.keys():

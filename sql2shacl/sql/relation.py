@@ -15,8 +15,12 @@ limitations under the License.
 
 """
 
+from __future__ import annotations
+
 import logging
-from typing import List, Tuple, Union, Dict
+from typing import List, Tuple, Union, Dict, TYPE_CHECKING
+from collections import defaultdict
+from itertools import chain
 from sqlparse.sql import Token
 from sqlparse.tokens import Name, Keyword, String, Comment
 from .column import Column
@@ -28,6 +32,9 @@ from .constraint import (
     ColumnForeignKey,
 )
 
+if TYPE_CHECKING:
+    from .ddl import DDL
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,14 +42,15 @@ class Relation:
 
     def __init__(
         self,
+        rel_manager: DDL,
         rel_name: str,
         expressions: List[List[Token]],
     ):
+        self._rel_manager = rel_manager
         logger.info(f"Identified relation <{rel_name}>")
         self._name = rel_name
         self._expressions = expressions
         self._cols, self._tab_constraints = self._classify_expressions()
-        self._set_references_for_columns()
 
     @property
     def name(self) -> str:
@@ -75,15 +83,13 @@ class Relation:
         return [col.name for col in self.columns]
 
     @property
-    def foreign_key_constraints(
-        self,
-    ) -> List[Union[ColumnForeignKey, TableForeignKey]]:
+    def references_column_constraints(self) -> List[ColumnForeignKey]:
         """TODO"""
 
-        return [col.reference for col in self.columns if col.reference is not None]
+        return [col.reference for col in self.columns if col.has_reference]
 
     @property
-    def foreign_key_table_constraints(self) -> List[Union[TableForeignKey, None]]:
+    def foreign_key_table_constraints(self) -> List[TableForeignKey]:
         """TODO"""
 
         return [
@@ -94,18 +100,21 @@ class Relation:
 
     @property
     def referenced_relation_names(self) -> List[Union[str, None]]:
-        """TODO"""
+        """Returns a list of distinct referenced relation names."""
 
         return list(
             {
                 constraint.referenced_relation_name
-                for constraint in self.foreign_key_constraints
+                for constraint in (
+                    self.foreign_key_table_constraints
+                    + self.references_column_constraints
+                )
             }
         )
 
     @property
     def references_itself(self) -> bool:
-        """TODO"""
+        """Returns whether the relation's name is referenced in an own constraint."""
 
         if self.name in self.referenced_relation_names:
             return True
@@ -114,7 +123,7 @@ class Relation:
 
     @property
     def primary_key_tab_constraint(self) -> Union[TablePrimaryKey, None]:
-        """TODO"""
+        """Returns the `PRIMARY KEY` table constraint if existing."""
 
         for constraint in self.table_constraints:
             if isinstance(constraint, TablePrimaryKey):
@@ -145,7 +154,25 @@ class Relation:
     def do_all_columns_reference(self) -> bool:
         """TODO"""
 
-        if all([col.has_reference for col in self.columns]):
+        referencing_table_constraint_column_names = list(
+            chain(
+                *[
+                    constraint.column_names
+                    for constraint in self.foreign_key_table_constraints
+                ]
+            )
+        )
+
+        referencing_column_constraint_column_names = [
+            col.name for col in self.columns if col.has_reference
+        ]
+
+        all_referencing_column_names = (
+            referencing_table_constraint_column_names
+            + referencing_column_constraint_column_names
+        )
+
+        if set(all_referencing_column_names) == set(self.column_names):
             return True
 
         return False
@@ -160,13 +187,6 @@ class Relation:
 
         return False
 
-    def _set_references_for_columns(self) -> None:
-        """TODO"""
-
-        for tab_constraint in self._tab_constraints:
-            if isinstance(tab_constraint, TableForeignKey):
-                tab_constraint._set_reference_for_columns()
-
     def get_column_by_name(self, col_name: str) -> Column:
         """TODO"""
 
@@ -179,11 +199,17 @@ class Relation:
     def _prepare_foreign_key_references_per_column(
         self,
     ) -> Dict[str, List[Tuple[str, str]]]:
-        """TODO"""
+        """Returns a dict containing for each referencing column the respective referenced column and referenced relation name
 
-        foreign_key_refs = {}
+        Wrt `TableForeignKey`, only single-column foreign keys matter here,
+        bc this method is only used for checking whether a relation is binary."""
 
-        for constraint in self.foreign_key_constraints:
+        foreign_key_refs = defaultdict(list)
+        foreign_key_constraints = (
+            self.references_column_constraints + self.foreign_key_table_constraints
+        )
+
+        for constraint in foreign_key_constraints:
             ref_rel_name = constraint.referenced_relation_name
 
             if isinstance(constraint, ColumnForeignKey):
@@ -191,7 +217,6 @@ class Relation:
                 ref_col_name = constraint.referenced_column_name
 
             if isinstance(constraint, TableForeignKey):
-                # only single-column foreign keys matter
                 if len(constraint.column_names) == 1:
                     col_name = constraint.column_names[0]
                     ref_col_name = constraint.referenced_column_names[0]
@@ -200,19 +225,17 @@ class Relation:
                     continue
 
             refs = (ref_rel_name, ref_col_name)
-
-            if foreign_key_refs.get(col_name, None) is None:
-                foreign_key_refs[col_name] = [refs]
-
-            else:
-                foreign_key_refs[col_name].append(refs)
+            foreign_key_refs[col_name].append(refs)
 
         return foreign_key_refs
 
     def _contains_duplicate_references_for_a_column(
         self, foreign_key_refs: dict
     ) -> bool:
-        """TODO"""
+        """Returns whether a column is the attribute of two distinct foreign keys
+
+        This is the case when a column is referencing the same column of two distinct relations
+        or two distinct columns of the same relation."""
 
         for _, refs in foreign_key_refs.items():
             ref_rels = [tup[0] for tup in refs]
@@ -221,8 +244,6 @@ class Relation:
             if (len(ref_rels) != len(set(ref_rels))) or (
                 len(ref_cols) != len(set(ref_cols))
             ):
-                # col is referencing the same col of two distinct relations
-                # or two distinct cols of the same relation
                 return True
 
         return False
@@ -243,6 +264,47 @@ class Relation:
         return self._contains_duplicate_references_for_a_column(
             self._prepare_foreign_key_references_per_column()
         )
+
+    def is_binary(self) -> bool:
+        """Returns if a relation is a binary relation
+
+        Informally, a relation R is a binary relation between two relations S and T if:
+
+            1. both S and T are different from R
+            2. R has exactly two attributes A and B, which form a primary key of R
+            3. A is the attribute of a foreign key in R that points to S
+            4. B is the attribute of a foreign key in R that points to T
+            5. A is not the attribute of two distinct foreign keys in R
+            6. B is not the attribute of two distinct foreign keys in R
+            7. A and B are not the attributes of a composite foreign key in R
+            8. relation R does not have incoming foreign keys
+
+        See Sequeda2012 [1] for details.
+
+        Example for a binary relation:
+        ```
+        CREATE TABLE Asg (
+            ToEmp integer REFERENCES Emp (E_id),
+            ToPrj integer REFERENCES Prj (P_id),
+            PRIMARY KEY (ToEmp, ToPrj)
+        )
+        ```
+
+        [1] https://doi.org/10.1145/2187836.2187924
+        """
+
+        if (
+            not self.references_itself  # 1 (in combination with 2)
+            and self.has_exactly_two_attributes  # 2
+            and self.do_all_columns_form_primary_key  # 2
+            and self.do_all_columns_reference  # 3, 4 (in combination with 2)
+            and not self.has_column_involved_in_two_distinct_foreign_keys()  # 5, 6
+            and not self.do_all_columns_form_foreign_key  # 7
+            and not self._rel_manager.is_other_relation_referencing(self)  # 8
+        ):
+            return True
+
+        return False
 
     def _classify_expressions(
         self,

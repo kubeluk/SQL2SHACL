@@ -52,6 +52,17 @@ class DDL:
 
         return self._relations
 
+    def is_other_relation_referencing(self, rel: Relation) -> bool:
+        """TODO"""
+
+        others = [other for other in self.relations if other.name != rel.name]
+
+        for other_ in others:
+            if rel.name in other_.referenced_relation_names:
+                return True
+
+        return False
+
     @staticmethod
     def _is_punctuation_end_of_expression(
         punct: Token, expression: List[Token]
@@ -238,58 +249,6 @@ class DDL:
         """TODO"""
 
         return [
-            Relation(rel_name, expressions)
+            Relation(self, rel_name, expressions)
             for rel_name, expressions in self.relation_details.items()
         ]
-
-    def _is_other_relation_referencing(self, rel: Relation) -> bool:
-        """TODO"""
-
-        others = [other for other in self.relations if other.name != rel.name]
-
-        for other_ in others:
-            if rel.name in other_.referenced_relation_names:
-                return True
-
-        return False
-
-    def is_relation_binary(self, rel: Relation) -> bool:
-        """Returns if a relation is a binary relation
-
-        Informally, a relation R is a binary relation between two relations S and T if:
-
-            1. both S and T are different from R
-            2. R has exactly two attributes A and B, which form a primary key of R
-            3. A is the attribute of a foreign key in R that points to S
-            4. B is the attribute of a foreign key in R that points to T
-            5. A is not the attribute of two distinct foreign keys in R
-            6. B is not the attribute of two distinct foreign keys in R
-            7. A and B are not the attributes of a composite foreign key in R
-            8. relation R does not have incoming foreign keys
-
-        See Sequeda2012 [1] for details.
-
-        Example for a binary relation:
-        ```
-        CREATE TABLE Asg (
-            ToEmp integer REFERENCES Emp (E_id),
-            ToPrj integer REFERENCES Prj (P_id),
-            PRIMARY KEY (ToEmp, ToPrj)
-        )
-        ```
-
-        [1] https://doi.org/10.1145/2187836.2187924
-        """
-
-        if (
-            not rel.references_itself  # 1 (in combination with 2)
-            and rel.has_exactly_two_attributes  # 2
-            and rel.do_all_columns_form_primary_key  # 2
-            and rel.do_all_columns_reference  # 3, 4 (in combination with 2)
-            and not rel.has_column_involved_in_two_distinct_foreign_keys()  # 5, 6
-            and not rel.do_all_columns_form_foreign_key  # 7
-            and not self._is_other_relation_referencing(rel)  # 8
-        ):
-            return True
-
-        return False

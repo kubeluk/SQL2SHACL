@@ -192,7 +192,7 @@ class Shaper:
     def _handle_references_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        if isinstance(col.reference, ColumnForeignKey):
+        if col.has_reference:
             ref = col.reference
             rel_name = ref.relation_name
             refereced_rel_name = ref.referenced_relation_name
@@ -256,23 +256,24 @@ class Shaper:
 
         logger.info(f"Shaping binary relation {rel.name} ...")
 
-        unique_properties = []
         ref_rel_names = []
         col_names = []
         ref_col_names = []
 
-        # TODO: check if ref_col_names exist in ref_rel_names? (semantic check if foreign key is possible)
-        for fk_constraint in rel.foreign_key_constraints:
-            unique_properties.append(fk_constraint.is_unique)
-            ref_rel_names.append(fk_constraint.referenced_relation_name)
+        foreign_key_constraints = (
+            rel.references_column_constraints + rel.foreign_key_table_constraints
+        )
 
-            if isinstance(fk_constraint, ColumnForeignKey):
-                col_names.append(fk_constraint.column_name)
-                ref_col_names.append(fk_constraint.referenced_column_name)
+        for constraint in foreign_key_constraints:
+            if isinstance(constraint, ColumnForeignKey):
+                ref_rel_names.append(constraint.referenced_relation_name)
+                col_names.append(constraint.column_name)
+                ref_col_names.append(constraint.referenced_column_name)
 
-            elif isinstance(fk_constraint, TableForeignKey):
-                col_names.append(fk_constraint.column_names[0])
-                ref_col_names.append(fk_constraint.referenced_column_names[0])
+            elif isinstance(constraint, TableForeignKey):
+                ref_rel_names.append(constraint.referenced_relation_name)
+                col_names.append(constraint.column_names[0])
+                ref_col_names.append(constraint.referenced_column_names[0])
 
             else:
                 logger.error(
@@ -293,7 +294,7 @@ class Shaper:
         ref_rel_1_iri = self._iri_builder.build_class_iri(ref_rel_names[0])
         ref_rel_2_iri = self._iri_builder.build_class_iri(ref_rel_names[1])
 
-        if unique_properties[0]:
+        if rel.get_column_by_name(col_names[0]).has_unique_constraint:
             self._shapes_graph += MaxProp.shape(
                 ref_rel_1_iri, bin_rel_iri, ref_rel_2_iri
             )
@@ -301,7 +302,7 @@ class Shaper:
         else:
             self._shapes_graph += Prop.shape(ref_rel_1_iri, bin_rel_iri, ref_rel_2_iri)
 
-        if unique_properties[1]:
+        if rel.get_column_by_name(col_names[1]).has_unique_constraint:
             self._shapes_graph += InvMaxProp.shape(
                 ref_rel_2_iri, bin_rel_iri, ref_rel_1_iri
             )
@@ -315,7 +316,7 @@ class Shaper:
         """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
         for relation_ in self._relations:
-            if not self._ddl_manager.is_relation_binary(relation_):
+            if not relation_.is_binary():
                 self._shape_relation(relation_)
 
             else:
