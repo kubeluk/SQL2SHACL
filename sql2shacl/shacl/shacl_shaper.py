@@ -69,9 +69,6 @@ class Shaper:
             col.set_unique(True)
 
         else:
-            # TODO: are groups of columns used for primary keys really covered
-            # by the custom SHACL SPARQL constraint from the paper?
-            # -> otherwise skip here if len(col_uris) > 1 and print warning
             rel_name = tab_constraint.relation_name
             col_uris = [
                 self._iri_builder.build_attribute_iri(rel_name, col_name)
@@ -97,26 +94,20 @@ class Shaper:
         """TODO"""
 
         rel_name = tab_constraint.relation_name
+        referenced_rel_name = tab_constraint.referenced_relation_name
         col_names = tab_constraint.column_names
-
-        if len(col_names) > 1:
-            logger.warning(
-                f"Foreign keys that constrain and reference a group of columns (<{col_names}>) are not supported yet"
-            )
-            return
+        referenced_col_names = tab_constraint.referenced_column_names
 
         rel_uri = self._iri_builder.build_class_iri(rel_name)
-        referenced_rel_uri = self._iri_builder.build_class_iri(
-            tab_constraint.referenced_relation_name
-        )
+        referenced_rel_uri = self._iri_builder.build_class_iri(referenced_rel_name)
         path_obj_uri = self._iri_builder.build_foreign_key_iri(
             rel_name,
-            tab_constraint.referenced_relation_name,
+            referenced_rel_name,
             col_names,
-            tab_constraint.referenced_column_names,
+            referenced_col_names,
         )
 
-        if tab_constraint.is_not_null:
+        if tab_constraint.all_referenced_columns_are_not_null:
             self._shapes_graph += CrdProp.shape(
                 rel_uri, path_obj_uri, referenced_rel_uri
             )
@@ -125,7 +116,7 @@ class Shaper:
                 rel_uri, path_obj_uri, referenced_rel_uri
             )
 
-        if tab_constraint.is_unique:
+        if tab_constraint.group_of_referenced_columns_is_unique:
             self._shapes_graph += InvMaxProp.shape(
                 referenced_rel_uri, path_obj_uri, rel_uri
             )
@@ -201,12 +192,14 @@ class Shaper:
     def _handle_references_col_constraint(self, col: Column) -> None:
         """TODO"""
 
-        if isinstance(col.has_reference, ColumnForeignKey):
+        if isinstance(col.reference, ColumnForeignKey):
             ref = col.reference
-            rel_uri = self._iri_builder.build_class_iri(col.relation_name)
-            referenced_rel_uri = self._iri_builder.build_class_iri(
-                ref.referenced_relation_name
-            )
+            rel_name = ref.relation_name
+            refereced_rel_name = ref.referenced_relation_name
+
+            rel_uri = self._iri_builder.build_class_iri(rel_name)
+            referenced_rel_uri = self._iri_builder.build_class_iri(refereced_rel_name)
+
             path_obj_uri = self._iri_builder.build_foreign_key_iri(
                 col.relation_name,
                 ref.referenced_relation_name,

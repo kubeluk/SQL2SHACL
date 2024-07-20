@@ -133,8 +133,8 @@ class TableForeignKey(Constraint):
         logger.info("with table constraint <FOREIGN KEY>")
         super().__init__(parent, name, expression)
         (
-            self._unique,
-            self._not_null,
+            self._unique,  # TODO: not possible
+            self._not_null,  # TODO: not possible
             self._col_names,
             self._referenced_rel_name,
             self._referenced_col_names,
@@ -172,6 +172,26 @@ class TableForeignKey(Constraint):
         """TODO"""
 
         return self._not_null
+
+    @property
+    def all_referenced_columns_are_not_null(self) -> bool:
+        """TODO"""
+
+        return all(
+            self._parent.get_column_by_name(col_name).has_not_null_constraint
+            for col_name in self.column_names
+        )
+
+    @property
+    def group_of_referenced_columns_is_unique(self):
+        """TODO"""
+
+        for tab_constraint in self._parent.table_constraints:
+            if isinstance(tab_constraint, TableUnique):
+                if set(self.column_names) == set(tab_constraint.column_names):
+                    return True
+
+        return False
 
     def _set_reference_for_columns(self) -> None:
         """Remarks that columns do reference.

@@ -327,8 +327,12 @@ class Relation:
                     case "FOREIGN":
                         tab_constraints.append(
                             TableForeignKey(
-                                self, constraint_name, constraint_args[1:]
-                            )  # skip 'KEY' keyword in constraint_args
+                                self,
+                                constraint_name,
+                                constraint_args[
+                                    1:
+                                ],  # skip 'KEY' keyword in constraint_args
+                            )
                         )
 
                     case "PRIMARY KEY":
