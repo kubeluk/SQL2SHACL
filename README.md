@@ -4,6 +4,8 @@
 
 SQL2SHACL implements the constraint rewriting proposed in the paper "A Source-to-Target Constraint rewriting for Direct Mapping" by Ratan Bahadur Thapa and Martin Giese [[1]](#1).
 
+![Architecture diagram](/assets/sql2shacl_arch_dark.svg "Architecture diagram")
+
 ## Prerequisites
 
 Install poetry (see [official documentation](https://python-poetry.org/docs/#installing-with-the-official-installer))
