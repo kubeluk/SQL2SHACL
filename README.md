@@ -105,8 +105,3 @@ See the mapping file (`src/components/sqldatatype2xmlschema.json`) for their res
 ### N-ary relations
 
 - currently only binary relations are supported
-
-## References
-
-<a id="1">[1]</a> 
-Thapa, R.B., Giese, M. (2021). A Source-to-Target Constraint Rewriting for Direct Mapping. In: Hotho, A., et al. The Semantic Web – ISWC 2021. ISWC 2021. Lecture Notes in Computer Science(), vol 12922. Springer, Cham. https://doi.org/10.1007/978-3-030-88361-4_2
