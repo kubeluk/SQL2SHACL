@@ -2,7 +2,8 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-SQL2SHACL implements the constraint rewriting proposed in the paper "A Source-to-Target Constraint rewriting for Direct Mapping" by Ratan Bahadur Thapa and Martin Giese [[1]](#1).
+SQL2SHACL implements the constraint rewriting in two versions:
+one proposed in the paper "A Source-to-Target Constraint rewriting for Direct Mapping" by Ratan Bahadur Thapa and Martin Giese [[1]](#1), other one aligns the W3C Recommendation [A Direct Mapping of Relational Data to RDF](https://www.w3.org/TR/rdb-direct-mapping/)
 
 ![Architecture diagram](/assets/sql2shacl_arch_dark.svg "Architecture diagram")
 
@@ -43,13 +44,13 @@ python -m sql2shacl --loglevel INFO path/to/file.sql
 Write the generated SHACL shapes to a file:
 
 ```
-python -m sql2shacl --outfile path/to/out.ttl
+python -m sql2shacl --mode w3c|thapa --outfile path/to/out.ttl
 ```
 
 Provide a custom base IRI:
 
 ```
-python -m sql2shacl --base-iri http://example.org/base/ path/to/file.sql
+python -m sql2shacl --base-iri http://example.com/base/ path/to/file.sql 
 ```
 
 ## Run tests
