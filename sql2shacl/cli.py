@@ -35,7 +35,7 @@ def create_parser():
         "--base-iri",
         dest="iri",
         metavar="IRI",
-        default="http://example.org/base/",
+        default="http://example.com/base/",
         help="used as the IRI prefix (defaults to 'http://example.org/base/')",
     )
 

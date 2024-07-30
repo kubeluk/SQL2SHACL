@@ -76,13 +76,11 @@ class ConstraintRewriter:
     def serialize_shapes(self) -> str:
 
         self.shapes_graph.bind("uq", UQ)
-        self.shapes_graph.bind("", self.iri_builder.base)
         return self.shapes_graph.serialize(format="ttl")
 
     def write_shapes(self, file_path: str) -> None:
 
         self.shapes_graph.bind("uq", UQ)
-        self.shapes_graph.bind("", self.iri_builder.base)
         self.shapes_graph.serialize(file_path, format="ttl")
 
     def print_shapes(self) -> str:
