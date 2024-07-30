@@ -39,14 +39,14 @@ def rewrite(
     logger = logging.getLogger(__name__)
 
     try:
-        rewriter = cr.ConstraintRewriter.setup(sql, base_iri,mode)
-        rewriter.rewrite()
+        rewriter = cr.ConstraintRewriter.setup(sql, base_iri, mode)
+        rewriter.rewrite(mode)
 
     except exceptions.MissingSQLDatatypeException:
         logger.error("It seems there are missing data types in the column definitions")
 
-    else:
-        if out_path is not None:
-            rewriter.write_shapes(out_path)
+    if out_path is not None:
+        rewriter.write_shapes(out_path)
 
-        return rewriter.serialize_shapes()
+    else:
+        rewriter.print_shapes()

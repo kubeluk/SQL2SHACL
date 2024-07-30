@@ -109,28 +109,6 @@ def main(args=None):
     else:
         loglevel = logging.WARNING
 
-    # if args.iri:
-    #     baseiri = args.iri
-    # else:
-    #     baseiri = "http://example.org/base/"
-
-    close_stream = False
-    if args.outfile:
-        try:
-            stream = open(args.outfile, "w", encoding="utf-8")
-            close_stream = True
-        except OSError as e:
-            return _error(f"Failed to open {args.outfile}: {e}")
-
-    else:
-        stream = sys.stdout
-
-    shapes_graph = sql2shacl.rewrite(sql=data, base_iri=args.iri, mode=args.mode, log_level=loglevel)
-
-    stream.write(shapes_graph)
-    stream.flush()
-
-    if close_stream:
-        stream.close()
+    sql2shacl.rewrite(sql=data, base_iri=args.iri, mode=args.mode, out_path=args.outfile, log_level=loglevel)
 
     return 0

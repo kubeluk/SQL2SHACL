@@ -130,6 +130,17 @@ class W3CBuilder(SequedaBuilder):
         attributes_part = ";".join(attributes)
         return URIRef(self.base + rel_part + "#ref-" + attributes_part)
 
+    def build_foreign_key_iri_binary(
+        self,
+        rel_name: str,
+        referenced_name: str,
+        attributes: List[str],
+        references: List[str],
+    ) -> URIRef:
+        rel_part = rel_name
+        attributes_part = ";".join(attributes)
+        return URIRef(self.base + rel_part + "#ref-" + attributes_part)
+
 
 class DMBuilder(Builder):
     pass

@@ -65,11 +65,11 @@ class ConstraintRewriter:
 
         pprint(self.get_parsed_ddl())
 
-    def rewrite(self):
+    def rewrite(self, mode: str) -> None:
         """TODO"""
 
         logger.info("~~~ REWRITING THE PARSED SQL CONSTRAINTS ...")
-        shaper = Shaper(self.iri_builder, self.ddl_manager)
+        shaper = Shaper(self.iri_builder, self.ddl_manager, mode)
         shaper.shape_up()
         self.shapes_graph += shaper.get_shapes()
 
@@ -80,9 +80,6 @@ class ConstraintRewriter:
         return self.shapes_graph.serialize(format="ttl")
 
     def write_shapes(self, file_path: str) -> None:
-
-        dir_path = os.path.dirname(file_path)
-        os.makedirs(dir_path, exist_ok=True)
 
         self.shapes_graph.bind("uq", UQ)
         self.shapes_graph.bind("", self.iri_builder.base)
