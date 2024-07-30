@@ -35,7 +35,17 @@ def create_parser():
         "--base-iri",
         dest="iri",
         metavar="IRI",
-        help="used as the IRI prefix (defaults to 'http://example.org/')",
+        default="http://example.org/base/",
+        help="used as the IRI prefix (defaults to 'http://example.org/base/')",
+    )
+
+    parser.add_argument(
+        "--mode",
+        dest="mode",
+        metavar="MODE",
+        default="w3c",
+        choices=["w3c", "thapa"],
+        help="direct mapping assumptions based on which shacl shapes are generated (defaults to 'w3c)",
     )
 
     parser.add_argument(
@@ -99,10 +109,10 @@ def main(args=None):
     else:
         loglevel = logging.WARNING
 
-    if args.iri:
-        baseiri = args.iri
-    else:
-        baseiri = "http://example.org/base/"
+    # if args.iri:
+    #     baseiri = args.iri
+    # else:
+    #     baseiri = "http://example.org/base/"
 
     close_stream = False
     if args.outfile:
@@ -115,7 +125,7 @@ def main(args=None):
     else:
         stream = sys.stdout
 
-    shapes_graph = sql2shacl.rewrite(sql=data, base_iri=baseiri, log_level=loglevel)
+    shapes_graph = sql2shacl.rewrite(sql=data, base_iri=args.iri, mode=args.mode, log_level=loglevel)
 
     stream.write(shapes_graph)
     stream.flush()

@@ -24,7 +24,7 @@ from sqlparse.sql import Token
 from .sql.ddl import DDL
 from .shacl.shacl_shaper import Shaper
 from .shacl.shacl_provider import UQ
-from .shacl.iri_builder import Builder, SequedaBuilder
+from .shacl.iri_builder import Builder, SequedaBuilder, W3CBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +41,12 @@ class ConstraintRewriter:
         cls,
         ddl_script: str,
         base_iri: str = "http://example.org/base/",
-        iri_builder: str = "Sequeda",
+        mode: str = "w3c",
     ):
-        if iri_builder == "Sequeda":
+        if mode == "w3c":
+            iri_builder = W3CBuilder(base_iri)
+        elif mode == "thapa":
             iri_builder = SequedaBuilder(base_iri)
-
         else:
             raise ValueError("Unknown IRI builder provided")
 
@@ -73,21 +74,20 @@ class ConstraintRewriter:
         self.shapes_graph += shaper.get_shapes()
 
     def serialize_shapes(self) -> str:
-        """TODO"""
 
         self.shapes_graph.bind("uq", UQ)
+        self.shapes_graph.bind("", self.iri_builder.base)
         return self.shapes_graph.serialize(format="ttl")
 
     def write_shapes(self, file_path: str) -> None:
-        """TODO"""
 
         dir_path = os.path.dirname(file_path)
         os.makedirs(dir_path, exist_ok=True)
 
-        with open(file_path, "w") as file:
-            file.write(self.serialize_shapes())
+        self.shapes_graph.bind("uq", UQ)
+        self.shapes_graph.bind("", self.iri_builder.base)
+        self.shapes_graph.serialize(file_path, format="ttl")
 
     def print_shapes(self) -> str:
-        """TODO"""
 
         print(self.serialize_shapes())

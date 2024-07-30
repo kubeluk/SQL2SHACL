@@ -43,6 +43,16 @@ class Builder(ABC):
     def build_datatype_iri(self, dtype: str) -> URIRef:
         pass
 
+    # @abstractmethod
+    # def build_foreign_key_iri(
+    #     self,
+    #     rel_name: str,
+    #     referenced_name: str,
+    #     attributes: List[str],
+    #     references: List[str],
+    # ) -> URIRef:
+    #     pass
+
     @abstractmethod
     def build_foreign_key_iri(
         self,
@@ -106,6 +116,19 @@ class SequedaBuilder(Builder):
         return URIRef(
             self.base + bin_rel_name + "#" + col_names + "," + referenced_col_names
         )
+
+class W3CBuilder(SequedaBuilder):
+
+    def build_foreign_key_iri(
+        self,
+        rel_name: str,
+        referenced_name: str,
+        attributes: List[str],
+        references: List[str],
+    ) -> URIRef:
+        rel_part = rel_name
+        attributes_part = ";".join(attributes)
+        return URIRef(self.base + rel_part + "#ref-" + attributes_part)
 
 
 class DMBuilder(Builder):

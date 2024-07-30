@@ -29,6 +29,7 @@ __all__ = ["cr", "cr_logging", "exceptions"]
 def rewrite(
     sql: str,
     base_iri: str = "http://example.org/base/",
+    mode: str = "w3c",
     log_level: int = logging.WARNING,
     log_file: str = None,
     out_path: str = None,
@@ -38,7 +39,7 @@ def rewrite(
     logger = logging.getLogger(__name__)
 
     try:
-        rewriter = cr.ConstraintRewriter.setup(sql, base_iri)
+        rewriter = cr.ConstraintRewriter.setup(sql, base_iri,mode)
         rewriter.rewrite()
 
     except exceptions.MissingSQLDatatypeException:
