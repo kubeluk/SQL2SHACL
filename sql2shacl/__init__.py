@@ -50,3 +50,5 @@ def rewrite(
 
     else:
         rewriter.print_shapes()
+
+    return rewriter.serialize_shapes()
