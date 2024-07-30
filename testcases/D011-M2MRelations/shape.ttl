@@ -20,6 +20,13 @@
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Student#LastName> ] ; 
+    sh:property [
+        sh:path [
+            sh:inversePath <Student_Sport#ref-ID_Student>
+        ];
+        sh:nodeKind sh:IRI;
+        sh:class <Student_Sport>
+    ];
     uq:uniqueValuesForClass [
         uq:unqProp <Student#ID> ;
         uq:unqForClass <Student>
@@ -38,10 +45,10 @@
         sh:path <Sport#Description> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student#ref-Sport>
+            sh:inversePath <Student_Sport#ref-ID_Sport>
         ];
         sh:nodeKind sh:IRI;
-        sh:class <Student>
+        sh:class <Student_Sport>
     ];
     uq:uniqueValuesForClass [
         uq:unqProp <Sport#ID> ;
@@ -60,13 +67,13 @@
         sh:maxCount 1 ;
         sh:path <Student_Sport#ID_Sport> ] ; 
     sh:property [
-        sh:path <Student_Sport#ID_Student> ;
+        sh:path <Student_Sport#ref-ID_Student> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Student>
     ];
     sh:property [
-        sh:path <Student_Sport#ID_Sport> ;
+        sh:path <Student_Sport#ref-ID_Sport> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Sport>
