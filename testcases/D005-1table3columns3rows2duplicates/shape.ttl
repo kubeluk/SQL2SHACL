@@ -17,4 +17,4 @@
     sh:property [ sh:datatype xsd:double ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <IOUs#lname> ] .
+        sh:path <IOUs#amount> ] .
