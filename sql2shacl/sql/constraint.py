@@ -45,16 +45,10 @@ class Constraint:
         return self._name
 
     @property
-    def relation(self):
+    def parent(self):
         """TODO"""
 
         return self._parent
-
-    @property
-    def relation_name(self) -> str:
-        """TODO"""
-
-        return self._parent.name
 
     def _break_down_expression(self):
         """
@@ -236,17 +230,12 @@ class ColumnForeignKey(Constraint):
     def __init__(self, parent: Column, name: str, expression: List[Token]):
         logger.info("that has <REFERENCES> column constraint")
         super().__init__(parent, name, expression)
-        self._col_name = parent.name
         self._referenced_rel_name, self._referenced_col_name = (
             self._break_down_expression()
         )
         logger.info(
             f"referencing column <{self._referenced_col_name}> of relation <{self._referenced_rel_name}>"
         )
-
-    @property
-    def column_name(self) -> str:
-        return self._col_name
 
     @property
     def referenced_relation_name(self) -> str:

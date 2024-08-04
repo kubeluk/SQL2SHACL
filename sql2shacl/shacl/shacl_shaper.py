@@ -63,13 +63,13 @@ class Shaper:
         """TODO"""
 
         if len(tab_constraint.column_names) == 1:
-            col = tab_constraint.relation.get_column_by_name(
+            col = tab_constraint.parent.get_column_by_name(
                 tab_constraint.column_names[0]
             )
             col.set_unique(True)
 
         else:
-            rel_name = tab_constraint.relation_name
+            rel_name = tab_constraint.parent.name
             col_uris = [
                 self._iri_builder.build_attribute_iri(rel_name, col_name)
                 for col_name in tab_constraint.column_names
@@ -85,7 +85,7 @@ class Shaper:
         """Set all columns of primary key not null"""
 
         for col_name in tab_constraint.column_names:
-            col = tab_constraint.relation.get_column_by_name(col_name)
+            col = tab_constraint.parent.get_column_by_name(col_name)
             col.set_not_null(True)
 
     def _handle_foreign_key_tab_constraint(
@@ -93,7 +93,7 @@ class Shaper:
     ) -> None:
         """TODO"""
 
-        rel_name = tab_constraint.relation_name
+        rel_name = tab_constraint.parent.name
         referenced_rel_name = tab_constraint.referenced_relation_name
         col_names = tab_constraint.column_names
         referenced_col_names = tab_constraint.referenced_column_names
@@ -194,7 +194,7 @@ class Shaper:
 
         if col.has_reference:
             ref = col.reference
-            rel_name = ref.relation_name
+            rel_name = ref.parent.relation_name
             refereced_rel_name = ref.referenced_relation_name
 
             rel_uri = self._iri_builder.build_class_iri(rel_name)
@@ -203,7 +203,7 @@ class Shaper:
             path_obj_uri = self._iri_builder.build_foreign_key_iri(
                 col.relation_name,
                 ref.referenced_relation_name,
-                [ref.column_name],
+                [ref.parent.name],
                 [ref.referenced_column_name],
             )
 
