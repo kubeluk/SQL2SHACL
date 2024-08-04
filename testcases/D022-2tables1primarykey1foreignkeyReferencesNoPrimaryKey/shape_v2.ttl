@@ -9,22 +9,22 @@
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Target#litattr1> ] ; 
-    sh:property [ sh:maxLength 4 ;
+    sh:property [ # sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Target#key1attr1> ] ; 
-    sh:property [ sh:maxLength 4 ;
+    sh:property [ # sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Target#key1attr2> ] ; 
-    sh:property [ sh:maxLength 4 ;
+    sh:property [ # sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Target#key2attr1> ] ; 
-    sh:property [ sh:maxLength 4 ;
+    sh:property [ # sh:maxLength 4 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
@@ -51,12 +51,12 @@
         sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <Source#ID> ] ; 
-    sh:property [ sh:maxLength 5 ;
+    sh:property [ # sh:maxLength 5 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
         sh:path <Source#attrA> ] ; 
-    sh:property [ sh:maxLength 5 ;
+    sh:property [ # sh:maxLength 5 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
@@ -71,22 +71,6 @@
         uq:unqProp <Source#ID> ;
         uq:unqForClass <Source>
     ] .
-
-<LIKES> a sh:NodeShape , rdfs:Class ;
-    sh:property [ sh:datatype xsd:integer ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <LIKES#id> ] ; 
-    sh:property [ sh:maxLength 30 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <LIKES#likeType> ] ; 
-    sh:property [ sh:maxLength 100 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:maxCount 1 ;
-        sh:path <LIKES#likedObj> ] .
 
 uq:UniqueValuesConstraintComponent
     a sh:ConstraintComponent ;
