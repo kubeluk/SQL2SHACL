@@ -15,8 +15,13 @@ limitations under the License.
 
 """
 
+import logging
 import json
+import urllib.parse
+
+from functools import wraps
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
 from typing import List
 from rdflib import URIRef
@@ -25,11 +30,37 @@ from ..utils.exceptions import UnsupportedSQLDatatypeException
 with open(Path("sql2shacl") / "components" / "sqldatatype2xmlschema.json") as f:
     SQLDTYPE_XMLSCHEMA_MAP = json.loads(f.read())
 
+logger = logging.getLogger(__name__)
+
+
+def recursive_quote(value):
+    """%-escape strings used for URIs recursively."""
+
+    if isinstance(value, str):
+        return urllib.parse.quote(value)
+    elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+        return type(value)(recursive_quote(item) for item in value)
+    else:
+        return value
+
+
+def quote_strings(func):
+    """Decorator that %-escapes strings used for URIs."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        quoted_args = [recursive_quote(arg) for arg in args]
+        quoted_kwargs = {k: recursive_quote(v) for k, v in kwargs.items()}
+
+        return func(*quoted_args, **quoted_kwargs)
+
+    return wrapper
+
 
 class Builder(ABC):
 
     def __init__(self, base: str):
-        self.base = base
+        self.base = urllib.parse.quote(base, ":/")
 
     @abstractmethod
     def build_class_iri(self, rel_name: str) -> URIRef:
@@ -67,12 +98,15 @@ class Builder(ABC):
 
 class SequedaBuilder(Builder):
 
+    @quote_strings
     def build_class_iri(self, rel_name: str) -> URIRef:
         return URIRef(self.base + rel_name)
 
+    @quote_strings
     def build_attribute_iri(self, rel_name: str, attribute_name: str) -> URIRef:
         return URIRef(self.base + rel_name + "#" + attribute_name)
 
+    @quote_strings
     def build_datatype_iri(self, dtype: str) -> URIRef:
         try:
             mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype.upper()]
@@ -82,6 +116,7 @@ class SequedaBuilder(Builder):
             )
         return URIRef(mapped)
 
+    @quote_strings
     def build_foreign_key_iri(
         self,
         rel_name: str,
@@ -93,6 +128,7 @@ class SequedaBuilder(Builder):
         attributes_part = ",".join(attributes) + "," + ",".join(references)
         return URIRef(self.base + rel_part + "#" + attributes_part)
 
+    @quote_strings
     def build_foreign_key_iri_binary(
         self,
         bin_rel_name: str,
