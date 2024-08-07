@@ -267,7 +267,7 @@ class Shaper:
         for constraint in foreign_key_constraints:
             if isinstance(constraint, ColumnForeignKey):
                 ref_rel_names.append(constraint.referenced_relation_name)
-                col_names.append(constraint.column_name)
+                col_names.append(constraint.parent.name)
                 ref_col_names.append(constraint.referenced_column_name)
 
             elif isinstance(constraint, TableForeignKey):

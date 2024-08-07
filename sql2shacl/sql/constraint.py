@@ -111,7 +111,6 @@ class TableUnique(Constraint):
                 col_name = str(tkn).strip('"')
                 col_names.append(col_name)
             #
-            # TODO: do this for all constraints that mention column or relation names
 
         return col_names
 
@@ -180,15 +179,6 @@ class TableForeignKey(Constraint):
                     return True
 
         return False
-
-    def _set_reference_for_columns(self) -> None:
-        """Remarks that columns do reference.
-
-        This is needed for detecting binary relations."""
-
-        for col_name in self._col_names:
-            col = self._parent.get_column_by_name(col_name)
-            col.set_reference(self)
 
     def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
         """TODO"""
@@ -271,7 +261,7 @@ class ColumnForeignKey(Constraint):
         #
 
         if len(self._expression) == 1:
-            referenced_col_name = self._col_name
+            referenced_col_name = self.parent.name
 
             # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
             referenced_col_name = referenced_col_name.strip('"')
