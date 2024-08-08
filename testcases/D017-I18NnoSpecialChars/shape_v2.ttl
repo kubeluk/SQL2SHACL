@@ -4,59 +4,57 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-# 植物
-<%E6%A4%8D%E7%89%A9> a sh:NodeShape , rdfs:Class ;
+<植物> a sh:NodeShape , rdfs:Class ;
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <%E6%A4%8D%E7%89%A9#%E5%90%8D> ] ; 
+        sh:path <植物#名> ] ; 
     sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:path <%E6%A4%8D%E7%89%A9#%E4%BD%BF%E7%94%A8%E9%83%A8> ] ; 
+        sh:path <植物#使用部> ] ; 
     sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <%E6%A4%8D%E7%89%A9#%E6%9D%A1%E4%BB%B6> ] ; 
+        sh:path <植物#条件> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <%E6%88%90%E5%88%86,%E6%A4%8D%E7%89%A9#%E6%A4%8D%E7%89%A9%E5%90%8D,%E4%BD%BF%E7%94%A8%E9%83%A8,%E5%90%8D,%E4%BD%BF%E7%94%A8%E9%83%A8>
+            sh:inversePath <成分,植物#植物名,使用部,名,使用部>
         ];
         sh:nodeKind sh:IRI;
-        sh:class <%E6%88%90%E5%88%86>
+        sh:class <成分>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <%E6%A4%8D%E7%89%A9#%E5%90%8D>, <%E6%A4%8D%E7%89%A9#%E4%BD%BF%E7%94%A8%E9%83%A8> ;
-        uq:unqForClass <%E6%A4%8D%E7%89%A9>
+        uq:unqProp <植物#名> , <植物#使用部> ;
+        uq:unqForClass <植物>
     ] .
 
-# 成分
-<%E6%88%90%E5%88%86> a sh:NodeShape , rdfs:Class ;
+<成分> a sh:NodeShape , rdfs:Class ;
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <%E6%88%90%E5%88%86#%E7%9A%BF> ] ; 
+        sh:path <成分#皿> ] ; 
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <%E6%88%90%E5%88%86#%E6%A4%8D%E7%89%A9%E5%90%8D> ] ; 
+        sh:path <成分#植物名> ] ; 
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <%E6%88%90%E5%88%86#%E4%BD%BF%E7%94%A8%E9%83%A8> ] ; 
+        sh:path <成分#使用部> ] ; 
     sh:property [
-        sh:path <%E6%88%90%E5%88%86,%E6%A4%8D%E7%89%A9#%E6%A4%8D%E7%89%A9%E5%90%8D,%E4%BD%BF%E7%94%A8%E9%83%A8,%E5%90%8D,%E4%BD%BF%E7%94%A8%E9%83%A8> ;
+        sh:path <成分,植物#植物名,使用部,名,使用部> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
-        sh:class <%E6%A4%8D%E7%89%A9>
+        sh:class <植物>
     ] .
 
 uq:UniqueValuesConstraintComponent

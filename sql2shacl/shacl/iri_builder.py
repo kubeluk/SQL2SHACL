@@ -33,28 +33,50 @@ with open(Path("sql2shacl") / "components" / "sqldatatype2xmlschema.json") as f:
 logger = logging.getLogger(__name__)
 
 
-def recursive_quote(value):
-    """%-escape strings used for URIs recursively."""
+class IRISafe:
 
-    if isinstance(value, str):
-        return urllib.parse.quote(value)
-    elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
-        return type(value)(recursive_quote(item) for item in value)
-    else:
-        return value
+    def iri_safe(string):
+        # Define the characters that should be considered safe.
+        # These include unreserved characters as well as non-ASCII characters (e.g., Chinese).
+        def is_iunreserved(char):
+            # Define the unreserved characters according to RFC 3987
+            return (
+                "A" <= char <= "Z"
+                or "a" <= char <= "z"
+                or "0" <= char <= "9"
+                or char in "-._~"
+                or ord(char) > 0x7F  # Allow non-ASCII characters
+            )
 
+        # Percent-encode only those characters not in the iunreserved set
+        return "".join(
+            char if is_iunreserved(char) else urllib.parse.quote(char, safe="")
+            for char in string
+        )
 
-def quote_strings(func):
-    """Decorator that %-escapes strings used for URIs."""
+    def recursive_iri_safe(value):
+        """%-escape strings used for URIs recursively."""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        quoted_args = [recursive_quote(arg) for arg in args]
-        quoted_kwargs = {k: recursive_quote(v) for k, v in kwargs.items()}
+        if isinstance(value, str):
+            return IRISafe.iri_safe(value)
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            return type(value)(IRISafe.recursive_iri_safe(item) for item in value)
+        else:
+            return value
 
-        return func(*quoted_args, **quoted_kwargs)
+    def iri_safe_params(func):
+        """Decorator that %-escapes strings used for URIs."""
 
-    return wrapper
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            quoted_args = [IRISafe.recursive_iri_safe(arg) for arg in args]
+            quoted_kwargs = {
+                k: IRISafe.recursive_iri_safe(v) for k, v in kwargs.items()
+            }
+
+            return func(*quoted_args, **quoted_kwargs)
+
+        return wrapper
 
 
 class Builder(ABC):
@@ -98,15 +120,15 @@ class Builder(ABC):
 
 class SequedaBuilder(Builder):
 
-    @quote_strings
+    @IRISafe.iri_safe_params
     def build_class_iri(self, rel_name: str) -> URIRef:
         return URIRef(self.base + rel_name)
 
-    @quote_strings
+    @IRISafe.iri_safe_params
     def build_attribute_iri(self, rel_name: str, attribute_name: str) -> URIRef:
         return URIRef(self.base + rel_name + "#" + attribute_name)
 
-    @quote_strings
+    @IRISafe.iri_safe_params
     def build_datatype_iri(self, dtype: str) -> URIRef:
         try:
             mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype.upper()]
@@ -116,7 +138,7 @@ class SequedaBuilder(Builder):
             )
         return URIRef(mapped)
 
-    @quote_strings
+    @IRISafe.iri_safe_params
     def build_foreign_key_iri(
         self,
         rel_name: str,
@@ -128,7 +150,7 @@ class SequedaBuilder(Builder):
         attributes_part = ",".join(attributes) + "," + ",".join(references)
         return URIRef(self.base + rel_part + "#" + attributes_part)
 
-    @quote_strings
+    @IRISafe.iri_safe_params
     def build_foreign_key_iri_binary(
         self,
         bin_rel_name: str,
@@ -142,7 +164,3 @@ class SequedaBuilder(Builder):
         return URIRef(
             self.base + bin_rel_name + "#" + col_names + "," + referenced_col_names
         )
-
-
-class DMBuilder(Builder):
-    pass
