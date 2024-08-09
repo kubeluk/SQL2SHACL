@@ -7,7 +7,6 @@
 <DEPT> a sh:NodeShape , rdfs:Class ;
     sh:property [ sh:datatype xsd:integer ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <DEPT#deptno> ] ; 
     sh:property [ sh:maxLength 30 ;
@@ -22,13 +21,13 @@
         sh:path <DEPT#loc> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <EMP#ref-deptno>
+            sh:inversePath <http://example.com/base/EMP#ref-deptno>
         ];
         sh:nodeKind sh:IRI;
         sh:class <EMP>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <DEPT#deptno> ;
+        uq:unqProp <http://example.com/base/DEPT#deptno> ;
         uq:unqForClass <DEPT>
     ] .
 
@@ -64,7 +63,7 @@
         sh:class <DEPT>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <EMP#empno> ;
+        uq:unqProp <http://example.com/base/EMP#empno> ;
         uq:unqForClass <EMP>
     ] .
 
