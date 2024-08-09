@@ -15,7 +15,6 @@ limitations under the License.
 
 """
 
-import os
 import logging
 from typing import Dict, List
 from pprint import pprint
