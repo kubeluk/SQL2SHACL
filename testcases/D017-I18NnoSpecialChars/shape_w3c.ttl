@@ -24,7 +24,7 @@
         sh:path <植物#条件> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <成分,植物#植物名,使用部,名,使用部>
+            sh:inversePath <成分#ref-植物名;使用部>>
         ];
         sh:nodeKind sh:IRI;
         sh:class <成分>
@@ -51,7 +51,7 @@
         sh:maxCount 1 ;
         sh:path <成分#使用部> ] ; 
     sh:property [
-        sh:path <成分,植物#植物名,使用部,名,使用部> ;
+        sh:path <成分#ref-植物名;使用部> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <植物>
