@@ -22,13 +22,13 @@
         sh:path <Student#LastName> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student_Sport#ref-ID_Student>
+            sh:inversePath <http://example.com/base/Student_Sport#ref-ID_Student>
         ];
         sh:nodeKind sh:IRI;
         sh:class <Student_Sport>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Student#ID> ;
+        uq:unqProp <http://example.com/base/Student#ID> ;
         uq:unqForClass <Student>
     ] .
 
@@ -45,13 +45,13 @@
         sh:path <Sport#Description> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Student_Sport#ref-ID_Sport>
+            sh:inversePath <http://example.com/base/Student_Sport#ref-ID_Sport>
         ];
         sh:nodeKind sh:IRI;
         sh:class <Student_Sport>
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <Sport#ID> ;
+        uq:unqProp <http://example.com/base/Sport#ID> ;
         uq:unqForClass <Sport>
     ] .
 
@@ -67,16 +67,22 @@
         sh:maxCount 1 ;
         sh:path <Student_Sport#ID_Sport> ] ; 
     sh:property [
-        sh:path <Student_Sport#ref-ID_Student> ;
+        sh:path <http://example.com/base/Student_Sport#ref-ID_Student> ;
         sh:nodeKind sh:IRI;
+        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:class <Student>
     ];
     sh:property [
-        sh:path <Student_Sport#ref-ID_Sport> ;
+        sh:path <http://example.com/base/Student_Sport#ref-ID_Sport> ;
         sh:nodeKind sh:IRI;
+        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:class <Sport>
+    ] ;
+    uq:uniqueValuesForClass [
+        uq:unqForClass <Student_Sport> ;
+        uq:unqProp <Student_Sport#ID_Sport>, <Student_Sport#ID_Student>
     ] .
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
