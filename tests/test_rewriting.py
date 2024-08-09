@@ -13,7 +13,6 @@ TESTCASES = [
     for testcase_ in os.listdir("testcases/")
     if os.path.isdir(os.path.join("testcases/", testcase_))
 ]
-TESTCASES = TESTCASES[:7]
 
 def write_test_output(file_path: str, serialized_graph: str):
 
