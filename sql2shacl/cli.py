@@ -90,7 +90,7 @@ def main(args=None):
 
     else:
         try:
-            with open(args.filename) as f:
+            with open(args.filename, encoding="utf-8") as f:
                 data = "".join(f.readlines())
         except OSError as e:
             return _error(f"Failed to read {args.filename}: {e}")
