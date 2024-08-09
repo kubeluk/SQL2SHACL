@@ -25,9 +25,12 @@ def write_test_output(file_path: str, serialized_graph: str):
 
 
 def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str, mode: str):
-    generated_shapes_graph_path = os.path.join(
-        os.path.dirname(sql_path), "sql2shacl_shape.ttl"
-    )
+    if mode == "w3c":
+        out_file_name = "sql2shacl_shape.ttl"
+    else:
+        out_file_name = "sql2shacl_shape_v2.ttl"
+
+    generated_shapes_graph_path = os.path.join(os.path.dirname(sql_path), out_file_name)
 
     with open(sql_path, "r") as file:
         sql = file.read()
