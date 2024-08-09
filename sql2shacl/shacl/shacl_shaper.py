@@ -18,7 +18,7 @@ limitations under the License.
 import logging
 from rdflib import Graph
 from pathlib import Path
-from .iri_builder import Builder
+from .iri_builder import Builder, SequedaBuilder, W3CBuilder
 from .shacl_provider import (
     Node,
     MaxData,
@@ -52,13 +52,12 @@ class Shaper:
     [1] http://urn.nb.no/URN:NBN:no-90764
     """
 
-    def __init__(self, iri_builder: Builder, ddl_manager: DDL, mode: 'w3c'):
+    def __init__(self, iri_builder: Builder, ddl_manager: DDL):
         self._shapes_graph = Graph()
         self._iri_builder = iri_builder
         self._ddl_manager = ddl_manager
         self._relations = ddl_manager.relations
         self._unq_component_added = False
-        self._mode = mode
 
     def _handle_unique_tab_constraint(self, tab_constraint: TableUnique) -> None:
         """TODO"""
@@ -264,6 +263,7 @@ class Shaper:
         foreign_key_constraints = (
             rel.references_column_constraints + rel.foreign_key_table_constraints
         )
+
         for constraint in foreign_key_constraints:
             if isinstance(constraint, ColumnForeignKey):
                 ref_rel_names.append(constraint.referenced_relation_name)
@@ -315,14 +315,15 @@ class Shaper:
     def shape_up(self) -> None:
         """Gets the output of DDLParser.parse_ddl() and builds SHACL shapes from it."""
 
-        if self._mode == "thapa":
+        if type(self._iri_builder) is SequedaBuilder:
             for relation_ in self._relations:
                 if not relation_.is_binary():
                     self._shape_relation(relation_)
 
                 else:
                     self._shape_binary_relation(relation_)
-        elif self._mode == "w3c":
+
+        if type(self._iri_builder) is W3CBuilder:
             for relation_ in self._relations:
                 self._shape_relation(relation_)
 

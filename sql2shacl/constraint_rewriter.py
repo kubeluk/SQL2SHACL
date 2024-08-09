@@ -45,8 +45,10 @@ class ConstraintRewriter:
     ):
         if mode == "w3c":
             iri_builder = W3CBuilder(base_iri)
-        elif mode == "thapa":
+
+        elif mode == "sequeda":
             iri_builder = SequedaBuilder(base_iri)
+
         else:
             raise ValueError("Unknown IRI builder provided")
 
@@ -65,11 +67,11 @@ class ConstraintRewriter:
 
         pprint(self.get_parsed_ddl())
 
-    def rewrite(self, mode: str) -> None:
+    def rewrite(self) -> None:
         """TODO"""
 
         logger.info("~~~ REWRITING THE PARSED SQL CONSTRAINTS ...")
-        shaper = Shaper(self.iri_builder, self.ddl_manager, mode)
+        shaper = Shaper(self.iri_builder, self.ddl_manager)
         shaper.shape_up()
         self.shapes_graph += shaper.get_shapes()
 
@@ -77,12 +79,3 @@ class ConstraintRewriter:
 
         self.shapes_graph.bind("uq", UQ)
         return self.shapes_graph.serialize(format="ttl")
-
-    def write_shapes(self, file_path: str) -> None:
-
-        self.shapes_graph.bind("uq", UQ)
-        self.shapes_graph.serialize(file_path, format="ttl")
-
-    def print_shapes(self) -> str:
-
-        print(self.serialize_shapes())

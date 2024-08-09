@@ -36,7 +36,7 @@ def create_parser():
         dest="iri",
         metavar="IRI",
         default="http://example.com/base/",
-        help="used as the IRI prefix (defaults to 'http://example.org/base/')",
+        help="used as the IRI prefix (defaults to 'http://example.com/base/')",
     )
 
     parser.add_argument(
@@ -44,7 +44,7 @@ def create_parser():
         dest="mode",
         metavar="MODE",
         default="w3c",
-        choices=["w3c", "thapa"],
+        choices=["w3c", "sequeda"],
         help="direct mapping assumptions based on which shacl shapes are generated (defaults to 'w3c)",
     )
 
@@ -53,7 +53,7 @@ def create_parser():
         "--outfile",
         dest="outfile",
         metavar="OUTFILE",
-        help="write output to OUTFILE (defaults to stdout)",
+        help="write output to OUTFILE",
     )
 
     parser.add_argument(
@@ -109,6 +109,25 @@ def main(args=None):
     else:
         loglevel = logging.WARNING
 
-    sql2shacl.rewrite(sql=data, base_iri=args.iri, mode=args.mode, out_path=args.outfile, log_level=loglevel)
+    close_stream = False
+    if args.outfile:
+        try:
+            stream = open(args.outfile, "w")
+            close_stream = True
+        except OSError as e:
+            return _error(f"Failed to open {args.outfile}: {e}")
+
+    else:
+        stream = sys.stdout
+
+    shapes_graph = sql2shacl.rewrite(
+        sql=data, base_iri=args.iri, mode=args.mode, log_level=loglevel
+    )
+
+    stream.write(shapes_graph)
+    stream.flush()
+
+    if close_stream:
+        stream.close()
 
     return 0

@@ -32,7 +32,6 @@ def rewrite(
     mode: str = "w3c",
     log_level: int = logging.WARNING,
     log_file: str = None,
-    out_path: str = None,
 ) -> str:
 
     cr_logging.setup_logging(log_level, log_file)
@@ -40,15 +39,9 @@ def rewrite(
 
     try:
         rewriter = cr.ConstraintRewriter.setup(sql, base_iri, mode)
-        rewriter.rewrite(mode)
+        rewriter.rewrite()
 
     except exceptions.MissingSQLDatatypeException:
         logger.error("It seems there are missing data types in the column definitions")
-
-    if out_path is not None:
-        rewriter.write_shapes(out_path)
-
-    else:
-        rewriter.print_shapes()
 
     return rewriter.serialize_shapes()
