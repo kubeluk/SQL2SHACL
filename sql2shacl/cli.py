@@ -112,7 +112,7 @@ def main(args=None):
     close_stream = False
     if args.outfile:
         try:
-            stream = open(args.outfile, "w")
+            stream = open(args.outfile, "w", encoding="utf-8")
             close_stream = True
         except OSError as e:
             return _error(f"Failed to open {args.outfile}: {e}")
