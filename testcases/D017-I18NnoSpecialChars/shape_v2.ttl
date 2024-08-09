@@ -14,6 +14,7 @@
     sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <植物#使用部> ] ; 
     sh:property [ #sh:maxLength 50 ;
@@ -42,13 +43,11 @@
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <成分#植物名> ] ; 
     sh:property [ #sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <成分#使用部> ] ; 
     sh:property [
@@ -56,10 +55,6 @@
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <植物>
-    ];
-    uq:uniqueValuesForClass [
-        uq:unqProp <成分#植物名>, <成分#使用部> ;
-        uq:unqForClass <成分>
     ] .
 
 uq:UniqueValuesConstraintComponent

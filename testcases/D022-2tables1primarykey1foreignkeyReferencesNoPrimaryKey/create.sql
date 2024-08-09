@@ -3,7 +3,7 @@ CREATE TABLE "Target" (
 	-- PRIMARY KEY("PK"),
 	"key1attr1" CHAR(4),
 	"key1attr2" CHAR(4),
-	UNIQUE ("key1attr1", "key1attr2"), -- groups of unique columns are not supported yet
+	UNIQUE ("key1attr1", "key1attr2"),
 	"key2attr1" CHAR(4),
 	"key2attr2" CHAR(4),
 	UNIQUE ("key2attr2", "key2attr1")
@@ -14,7 +14,7 @@ CREATE TABLE "Source" (
 	PRIMARY KEY("ID"),
 	"attrA" CHAR(4),
 	"attrB" CHAR(4),
-	FOREIGN KEY ("attrA", "attrB") REFERENCES "Target"("key2attr2", "key2attr1") -- groups of foreign keys are not supported yet
+	FOREIGN KEY ("attrA", "attrB") REFERENCES "Target"("key2attr2", "key2attr1")
 );
 
 INSERT INTO "Target" ("litattr1", "key1attr1", "key1attr2", "key2attr1", "key2attr2")

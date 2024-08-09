@@ -45,16 +45,10 @@ class Constraint:
         return self._name
 
     @property
-    def relation(self):
+    def parent(self):
         """TODO"""
 
         return self._parent
-
-    @property
-    def relation_name(self) -> str:
-        """TODO"""
-
-        return self._parent.name
 
     def _break_down_expression(self):
         """
@@ -117,7 +111,6 @@ class TableUnique(Constraint):
                 col_name = str(tkn).strip('"')
                 col_names.append(col_name)
             #
-            # TODO: do this for all constraints that mention column or relation names
 
         return col_names
 
@@ -187,15 +180,6 @@ class TableForeignKey(Constraint):
 
         return False
 
-    def _set_reference_for_columns(self) -> None:
-        """Remarks that columns do reference.
-
-        This is needed for detecting binary relations."""
-
-        for col_name in self._col_names:
-            col = self._parent.get_column_by_name(col_name)
-            col.set_reference(self)
-
     def _break_down_expression(self) -> Tuple[bool, bool, List[str], str, List[str]]:
         """TODO"""
 
@@ -236,17 +220,12 @@ class ColumnForeignKey(Constraint):
     def __init__(self, parent: Column, name: str, expression: List[Token]):
         logger.info("that has <REFERENCES> column constraint")
         super().__init__(parent, name, expression)
-        self._col_name = parent.name
         self._referenced_rel_name, self._referenced_col_name = (
             self._break_down_expression()
         )
         logger.info(
             f"referencing column <{self._referenced_col_name}> of relation <{self._referenced_rel_name}>"
         )
-
-    @property
-    def column_name(self) -> str:
-        return self._col_name
 
     @property
     def referenced_relation_name(self) -> str:
@@ -282,7 +261,7 @@ class ColumnForeignKey(Constraint):
         #
 
         if len(self._expression) == 1:
-            referenced_col_name = self._col_name
+            referenced_col_name = self.parent.name
 
             # needed for W3C RDB2RDF test cases (using quotes is not valid SQL syntax)
             referenced_col_name = referenced_col_name.strip('"')

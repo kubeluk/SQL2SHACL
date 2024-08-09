@@ -21,7 +21,8 @@ from typing import List, Dict, Tuple
 from sqlparse.sql import Identifier, Parenthesis, Token, TokenList, Statement
 from sqlparse.tokens import Name, Punctuation, Keyword, String, Comment
 from .relation import Relation
-from .identifier import is_valid_identifier
+
+# from .identifier import is_valid_identifier
 
 logger = logging.getLogger(__name__)
 
@@ -239,10 +240,10 @@ class DDL:
                     f"Skipping the following statement since it does not contain a relation name: <{str(stmt)}>"
                 )
 
-            elif not is_valid_identifier(relation_name):
-                logger.warning(
-                    f"Skipping the following statement since <{relation_name}> is not a valid SQL identifier: <{str(stmt)}>"
-                )
+            # elif not is_valid_identifier(relation_name):
+            #     logger.warning(
+            #         f"Skipping the following statement since <{relation_name}> is not a valid SQL identifier: <{str(stmt)}>"
+            #     )
 
             else:
                 relation_details[relation_name] = expressions

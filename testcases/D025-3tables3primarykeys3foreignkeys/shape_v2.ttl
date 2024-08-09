@@ -27,19 +27,6 @@
         sh:nodeKind sh:IRI;
         sh:class <People>
     ];
-    sh:property [
-        sh:path [
-            sh:inversePath <Department,People#manager,ID>
-        ];
-        sh:nodeKind sh:IRI;
-        sh:class <Department>
-    ];
-    sh:property [
-        sh:path <People,Department#deptName,deptCity,name,city> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <Department>
-    ];
     uq:uniqueValuesForClass [
         uq:unqProp <Addresses#ID> ;
         uq:unqForClass <Addresses>
@@ -66,19 +53,6 @@
         sh:maxCount 1 ;
         sh:path <Department#manager> ] ; 
     sh:property [
-        sh:path <Department,People#manager,ID> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <People>
-    ];
-    sh:property [
-        sh:path [
-            sh:inversePath <People,Department#deptName,deptCity,name,city>
-        ];
-        sh:nodeKind sh:IRI;
-        sh:class <People>
-    ];
-    sh:property [
         sh:path [
             sh:inversePath <Projects,Department#deptName,deptCity,name,city>
         ];
@@ -94,11 +68,11 @@
     ];
     uq:uniqueValuesForClass [
         uq:unqProp <Department#ID> ;
-        uq:unqForClass <Addresses>
+        uq:unqForClass <Department>
     ] ;
     uq:uniqueValuesForClass [
         uq:unqProp <Department#name>, <Department#city> ;
-        uq:unqForClass <Addresses>
+        uq:unqForClass <Department>
     ] .
 
 <People> a sh:NodeShape , rdfs:Class ;
@@ -131,20 +105,6 @@
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Addresses>
-    ];
-    sh:property [
-        sh:path [
-            sh:inversePath <Projects,People#lead,ID>
-        ];
-        sh:nodeKind sh:IRI;
-        sh:class <Projects>
-    ]; 
-    sh:property [
-        sh:path [
-            sh:inversePath <TaskAssignments,People#worker,ID>
-        ];
-        sh:nodeKind sh:IRI;
-        sh:class <TaskAssignments>
     ];
     uq:uniqueValuesForClass [
         uq:unqProp <People#ID> ;
@@ -184,19 +144,13 @@
         sh:maxCount 1 ;
         sh:class <Department>
     ];
-    sh:property [
-        sh:path <Projects,People#lead,ID> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <People>
-    ];
     uq:uniqueValuesForClass [
         uq:unqProp <Projects#lead>, <Projects#name> ;
-        uq:unqForClass <Addresses>
+        uq:unqForClass <Projects>
     ] ;
     uq:uniqueValuesForClass [
         uq:unqProp <Projects#name>, <Projects#deptName>, <Projects#deptCity> ;
-        uq:unqForClass <Addresses>
+        uq:unqForClass <Projects>
     ] .
 
 <TaskAssignments> a sh:NodeShape , rdfs:Class ;
@@ -208,6 +162,7 @@
     sh:property [ #sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <TaskAssignments#project> ] ; 
     sh:property [ #sh:maxLength 50 ;
@@ -232,15 +187,9 @@
         sh:maxCount 1 ;
         sh:class <Department>
     ];
-   sh:property [
-        sh:path <TaskAssignments,People#worker,ID> ;
-        sh:nodeKind sh:IRI;
-        sh:maxCount 1 ;
-        sh:class <People>
-    ];
     uq:uniqueValuesForClass [
         uq:unqProp <TaskAssignments#worker>, <TaskAssignments#project> ;
-        uq:unqForClass <Addresses>
+        uq:unqForClass <TaskAssignments>
     ] .
 
 uq:UniqueValuesConstraintComponent

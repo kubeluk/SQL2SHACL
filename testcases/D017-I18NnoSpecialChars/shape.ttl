@@ -14,6 +14,7 @@
     sh:property [ sh:maxLength 50 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
+        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <植物#使用部> ] ; 
     sh:property [ sh:maxLength 50 ;
@@ -23,7 +24,7 @@
         sh:path <植物#条件> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <成分#ref-植物名;使用部>
+            sh:inversePath <成分,植物#植物名,使用部,名,使用部>
         ];
         sh:nodeKind sh:IRI;
         sh:class <成分>
@@ -42,44 +43,42 @@
     sh:property [ sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <成分#植物名> ] ; 
     sh:property [ sh:maxLength 10 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
-        sh:minCount 1 ;
         sh:maxCount 1 ;
         sh:path <成分#使用部> ] ; 
     sh:property [
-        sh:path <成分#ref-植物名;使用部> ;
+        sh:path <成分,植物#植物名,使用部,名,使用部> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <植物>
-    ];
-    uq:uniqueValuesForClass [
-        uq:unqProp <成分#植物名>, <成分#使用部> ;
-        uq:unqForClass <成分>
     ] .
 
-uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
+uq:UniqueValuesConstraintComponent
+    a sh:ConstraintComponent ;
     sh:parameter [
         sh:path uq:uniqueValuesForClass
     ] ; 
     sh:nodeValidator [
         a sh:SPARQLSelectValidator ;
         sh:select """
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX uq: <http://sirius−labs.no/shapes/unique#>
+
             SELECT $this ?other
             WHERE { 
                 FILTER NOT EXISTS {
                     GRAPH $shapesGraph {
                         $uniqueValuesForClass uq:unqProp ?prop
                     }
-                    $this ?prop ? thisVal .
+                    $this ?prop ?thisVal .
                     ?other ?prop ?otherVal .
                     FILTER (?thisVal != ?otherVal)
                 }
-                FILTER (?other != $this )
+                FILTER (?other != $this)
                 GRAPH $shapesGraph {
                     $uniqueValuesForClass uq:unqForClass ?class
                 } 

@@ -15,21 +15,76 @@ limitations under the License.
 
 """
 
+import logging
 import json
+import urllib.parse
+
+from functools import wraps
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from rdflib import URIRef
 from ..utils.exceptions import UnsupportedSQLDatatypeException
 
 with open(Path("sql2shacl") / "components" / "sqldatatype2xmlschema.json") as f:
     SQLDTYPE_XMLSCHEMA_MAP = json.loads(f.read())
 
+logger = logging.getLogger(__name__)
+
+
+class IRISafe:
+
+    def iri_safe(string: str) -> str:
+        """Return IRI-safe string."""
+
+        # Define the characters that should be considered safe.
+        # These include unreserved characters as well as non-ASCII characters (e.g., Chinese).
+        def is_iunreserved(char):
+            # Define the unreserved characters according to RFC 3987
+            return (
+                "A" <= char <= "Z"
+                or "a" <= char <= "z"
+                or "0" <= char <= "9"
+                or char in "-._~"
+                or ord(char) > 0x7F  # Allow non-ASCII characters
+            )
+
+        # Percent-encode only those characters not in the iunreserved set
+        return "".join(
+            char if is_iunreserved(char) else urllib.parse.quote(char, safe="")
+            for char in string
+        )
+
+    def recursive_iri_safe(param: Union[str, List[str]]) -> Union[str, List[str]]:
+        """Return %-escaped parameters."""
+
+        if isinstance(param, str):
+            return IRISafe.iri_safe(param)
+        elif isinstance(param, Iterable) and not isinstance(param, (str, bytes)):
+            return type(param)(IRISafe.recursive_iri_safe(item) for item in param)
+        else:
+            return param
+
+    def iri_safe_params(func):
+        """Decorator that %-escapes strings used for IRIs."""
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            quoted_args = [IRISafe.recursive_iri_safe(arg) for arg in args]
+            quoted_kwargs = {
+                k: IRISafe.recursive_iri_safe(v) for k, v in kwargs.items()
+            }
+
+            return func(*quoted_args, **quoted_kwargs)
+
+        return wrapper
+
 
 class Builder(ABC):
 
     def __init__(self, base: str):
-        self.base = base
+        self.base = urllib.parse.quote(base, ":/")
 
     @abstractmethod
     def build_class_iri(self, rel_name: str) -> URIRef:
@@ -77,12 +132,15 @@ class Builder(ABC):
 
 class SequedaBuilder(Builder):
 
+    @IRISafe.iri_safe_params
     def build_class_iri(self, rel_name: str) -> URIRef:
         return URIRef(self.base + rel_name)
 
+    @IRISafe.iri_safe_params
     def build_attribute_iri(self, rel_name: str, attribute_name: str) -> URIRef:
         return URIRef(self.base + rel_name + "#" + attribute_name)
 
+    @IRISafe.iri_safe_params
     def build_datatype_iri(self, dtype: str) -> URIRef:
         try:
             mapped = SQLDTYPE_XMLSCHEMA_MAP[dtype.upper()]
@@ -92,6 +150,7 @@ class SequedaBuilder(Builder):
             )
         return URIRef(mapped)
 
+    @IRISafe.iri_safe_params
     def build_foreign_key_iri(
         self,
         rel_name: str,
@@ -103,6 +162,7 @@ class SequedaBuilder(Builder):
         attributes_part = ",".join(attributes) + "," + ",".join(references)
         return URIRef(self.base + rel_part + "#" + attributes_part)
 
+    @IRISafe.iri_safe_params
     def build_foreign_key_iri_binary(
         self,
         bin_rel_name: str,
@@ -116,6 +176,7 @@ class SequedaBuilder(Builder):
         return URIRef(
             self.base + bin_rel_name + "#" + col_names + "," + referenced_col_names
         )
+
 
 class W3CBuilder(SequedaBuilder):
 
