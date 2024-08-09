@@ -24,7 +24,7 @@
         sh:path <植物#条件> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <成分#ref-植物名;使用部>>
+            sh:inversePath <成分#ref-植物名;使用部>
         ];
         sh:nodeKind sh:IRI;
         sh:class <成分>
