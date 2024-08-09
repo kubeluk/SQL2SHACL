@@ -44,7 +44,7 @@ python -m sql2shacl --loglevel INFO path/to/file.sql
 Write the generated SHACL shapes to a file:
 
 ```
-python -m sql2shacl --mode w3c|thapa --outfile path/to/out.ttl
+python -m sql2shacl path/to/file.sql --mode w3c|thapa --outfile path/to/out.ttl
 ```
 
 Provide a custom base IRI:
