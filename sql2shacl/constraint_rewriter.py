@@ -45,7 +45,7 @@ class ConstraintRewriter:
         if mode == "w3c":
             iri_builder = W3CBuilder(base_iri)
 
-        elif mode == "sequeda":
+        elif mode == "thapa":
             iri_builder = SequedaBuilder(base_iri)
 
         else:

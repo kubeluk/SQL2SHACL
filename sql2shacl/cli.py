@@ -44,7 +44,7 @@ def create_parser():
         dest="mode",
         metavar="MODE",
         default="w3c",
-        choices=["w3c", "sequeda"],
+        choices=["w3c", "thapa"],
         help="direct mapping assumptions based on which shacl shapes are generated (defaults to 'w3c)",
     )
 
