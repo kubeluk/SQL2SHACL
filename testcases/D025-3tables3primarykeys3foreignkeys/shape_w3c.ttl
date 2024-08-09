@@ -22,7 +22,7 @@
         sh:path <Addresses#state> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <People,Addresses#addr,ID>
+            sh:inversePath <People#ref-addr>
         ];
         sh:nodeKind sh:IRI;
         sh:class <People>
@@ -54,14 +54,14 @@
         sh:path <Department#manager> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <Projects,Department#deptName,deptCity,name,city>
+            sh:inversePath <Projects#ref-deptName;deptCity>
         ];
         sh:nodeKind sh:IRI;
         sh:class <Projects>
     ];
     sh:property [
         sh:path [
-            sh:inversePath <TaskAssignments,Department#deptName,deptCity,name,city>
+            sh:inversePath <TaskAssignments#ref-deptName;deptCity>
         ];
         sh:nodeKind sh:IRI;
         sh:class <TaskAssignments>
@@ -101,7 +101,7 @@
         sh:maxCount 1 ;
         sh:path <People#deptCity> ] ; 
     sh:property [
-        sh:path <People,Addresses#addr,ID> ;
+        sh:path <People#ref-addr> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Addresses>
@@ -133,13 +133,13 @@
         sh:path <Projects#deptCity> ] ; 
     sh:property [
         sh:path [
-            sh:inversePath <TaskAssignments,Projects#project,deptName,deptCity,name,deptName,deptCity>
+            sh:inversePath <TaskAssignments#ref-project;deptName;deptCity>
         ];
         sh:nodeKind sh:IRI;
         sh:class <TaskAssignments>
     ]; 
     sh:property [
-        sh:path <Projects,Department#deptName,deptCity,name,city> ;
+        sh:path <Projects#ref-deptName;deptCity> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Department>
@@ -176,13 +176,13 @@
         sh:maxCount 1 ;
         sh:path <TaskAssignments#deptCity> ] ; 
     sh:property [
-        sh:path <TaskAssignments,Projects#project,deptName,deptCity,name,deptName,deptCity> ;
+        sh:path <TaskAssignments#ref-project;deptName;deptCity> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Projects>
     ];
     sh:property [
-        sh:path <TaskAssignments,Department#deptName,deptCity,name,city> ;
+        sh:path <TaskAssignments#ref-deptName;deptCity> ;
         sh:nodeKind sh:IRI;
         sh:maxCount 1 ;
         sh:class <Department>
