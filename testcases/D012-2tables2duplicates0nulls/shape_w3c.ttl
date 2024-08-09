@@ -9,7 +9,7 @@
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <IOUs#fname> ] ; 
+        sh:path <IOUs#lname> ] ; 
     sh:property [ sh:maxLength 20 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
@@ -30,7 +30,7 @@
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
         sh:maxCount 1 ;
-        sh:path <Lives#fname> ] ; 
+        sh:path <Lives#lname> ] ; 
     sh:property [ sh:maxLength 20 ;
         sh:datatype xsd:string ;
         sh:nodeKind sh:Literal ;
