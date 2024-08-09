@@ -13,7 +13,7 @@ TESTCASES = [
     for testcase_ in os.listdir("testcases/")
     if os.path.isdir(os.path.join("testcases/", testcase_))
 ]
-# TESTCASES = [testcase_ for testcase_ in TESTCASES if "011" in testcase_]
+
 def write_test_output(file_path: str, serialized_graph: str):
 
     dir_path = os.path.dirname(file_path)
@@ -31,7 +31,7 @@ def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str, mode: str
 
     generated_shapes_graph_path = os.path.join(os.path.dirname(sql_path), out_file_name)
 
-    with open(sql_path, "r") as file:
+    with open(sql_path, "r", encoding="utf-8") as file:
         sql = file.read()
 
     serialized_shapes_graph = sql2shacl.rewrite(
