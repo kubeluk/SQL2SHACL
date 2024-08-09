@@ -13,7 +13,7 @@ TESTCASES = [
     for testcase_ in os.listdir("testcases/")
     if os.path.isdir(os.path.join("testcases/", testcase_))
 ]
-
+# TESTCASES = [testcase_ for testcase_ in TESTCASES if "011" in testcase_]
 def write_test_output(file_path: str, serialized_graph: str):
 
     dir_path = os.path.dirname(file_path)
