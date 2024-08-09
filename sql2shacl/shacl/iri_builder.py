@@ -23,7 +23,7 @@ from functools import wraps
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from rdflib import URIRef
 from ..utils.exceptions import UnsupportedSQLDatatypeException
 
@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 
 class IRISafe:
 
-    def iri_safe(string):
+    def iri_safe(string: str) -> str:
+        """Return IRI-safe string."""
+
         # Define the characters that should be considered safe.
         # These include unreserved characters as well as non-ASCII characters (e.g., Chinese).
         def is_iunreserved(char):
@@ -54,18 +56,18 @@ class IRISafe:
             for char in string
         )
 
-    def recursive_iri_safe(value):
-        """%-escape strings used for URIs recursively."""
+    def recursive_iri_safe(param: Union[str, List[str]]) -> Union[str, List[str]]:
+        """Return %-escaped parameters."""
 
-        if isinstance(value, str):
-            return IRISafe.iri_safe(value)
-        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
-            return type(value)(IRISafe.recursive_iri_safe(item) for item in value)
+        if isinstance(param, str):
+            return IRISafe.iri_safe(param)
+        elif isinstance(param, Iterable) and not isinstance(param, (str, bytes)):
+            return type(param)(IRISafe.recursive_iri_safe(item) for item in param)
         else:
-            return value
+            return param
 
     def iri_safe_params(func):
-        """Decorator that %-escapes strings used for URIs."""
+        """Decorator that %-escapes strings used for IRIs."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
