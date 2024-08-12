@@ -1,138 +1,137 @@
-@prefix : <http://example.org/base/> .
+@base <http://example.com/base/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix uq: <http://sirius−labs.no/shapes/unique#> .
 
-:Emp a sh:NodeShape, rdfs:Class;
+<Emp> a sh:NodeShape, rdfs:Class;
     sh:property [
-        sh:path <http://example.org/base/Emp#E_id>;
+        sh:path <Emp#E_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <http://example.org/base/Emp#E_id>;
-        uq:unqForClass :Emp
+        uq:unqProp <Emp#E_id>;
+        uq:unqForClass <Emp>
     ];
     sh:property [
-        sh:path <http://example.org/base/Emp#Name>;
+        sh:path <Emp#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:string
     ];
     sh:property [
-        sh:path <http://example.org/base/Emp#Post>;
+        sh:path <Emp#Post>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string 
     ];
     sh:property [
-        sh:path <http://example.org/base/Asg#ToEmp,ToPrj,E_id,P_id>;
+        sh:path <Asg#ToEmp,ToPrj,E_id,P_id>;
         sh:nodeKind sh:IRI;
-        sh:class :Prj
+        sh:class <Prj>
     ].
 
-:Prj a sh:NodeShape, rdfs:Class;
+<Prj> a sh:NodeShape, rdfs:Class;
     sh:property [
-        sh:path <http://example.org/base/Prj#P_id>;
+        sh:path <Prj#P_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ]; 
     uq:uniqueValuesForClass [ 
-        uq:unqProp <http://example.org/base/Prj#P_id>;
-        uq:unqForClass :Prj 
+        uq:unqProp <Prj#P_id>;
+        uq:unqForClass <Prj>
     ];
     sh:property [
-        sh:path <http://example.org/base/Prj#Name>;
+        sh:path <Prj#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:string
     ];
     sh:property [
-        sh:path <http://example.org/base/Prj#ToAcc>;
+        sh:path <Prj#ToAcc>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <http://example.org/base/Prj#ToAcc>;
-        uq:unqForClass :Prj
+        uq:unqProp <Prj#ToAcc>;
+        uq:unqForClass <Prj>
     ];
     sh:property [
         sh:path [
-            sh:inversePath <http://example.org/base/Asg#ToEmp,ToPrj,E_id,P_id>
+            sh:inversePath <Asg#ToEmp,ToPrj,E_id,P_id>
         ];
         sh:nodeKind sh:IRI;
-        sh:class :Emp
+        sh:class <Emp>
     ];
     sh:property [
-        sh:path <http://example.org/base/Prj,Acc#ToAcc,A_id>;
+        sh:path <Prj,Acc#ToAcc,A_id>;
         sh:nodeKind sh:IRI;
         sh:maxCount 1;
         sh:minCount 1;
-        sh:class :Acc
+        sh:class <Acc>
     ].
 
-:Acc a sh:NodeShape, rdfs:Class; 
+<Acc> a sh:NodeShape, rdfs:Class; 
     sh:property [
-        sh:path <http://example.org/base/Acc#A_id>;
+        sh:path <Acc#A_id>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:minCount 1;
         sh:datatype xsd:integer
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <http://example.org/base/Acc#A_id>;
-        uq:unqForClass :Acc
+        uq:unqProp <Acc#A_id>;
+        uq:unqForClass <Acc>
     ];
     sh:property [
-        sh:path <http://example.org/base/Acc#Name>;
+        sh:path <Acc#Name>;
         sh:nodeKind sh:Literal;
         sh:maxCount 1;
         sh:datatype xsd:string
     ];
     uq:uniqueValuesForClass [
-        uq:unqProp <http://example.org/base/Acc#Name>;
-        uq:unqForClass :Acc
+        uq:unqProp <Acc#Name>;
+        uq:unqForClass <Acc>
     ];
     sh:property [
         sh:path [
-            sh:inversePath <http://example.org/base/Prj,Acc#ToAcc,A_id>
+            sh:inversePath <Prj,Acc#ToAcc,A_id>
         ];
         sh:nodeKind sh:IRI;
         sh:maxCount 1;
-        sh:class :Prj
+        sh:class <Prj>
     ].
 
 uq:UniqueValuesConstraintComponent a sh:ConstraintComponent ;
-    sh:parameter [
-        sh:path uq:uniqueValuesForClass
-    ] ; 
-    sh:nodeValidator [
-        a sh:SPARQLSelectValidator ;
-        sh:select """
+    sh:nodeValidator [ a sh:SPARQLSelectValidator ;
+            sh:select """
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX uq: <http://sirius−labs.no/shapes/unique#>
+
             SELECT $this ?other
             WHERE { 
                 FILTER NOT EXISTS {
                     GRAPH $shapesGraph {
                         $uniqueValuesForClass uq:unqProp ?prop
                     }
-                    $this ?prop ? thisVal .
+                    $this ?prop ?thisVal .
                     ?other ?prop ?otherVal .
                     FILTER (?thisVal != ?otherVal)
                 }
-                FILTER (?other != $this )
+                FILTER (?other != $this)
                 GRAPH $shapesGraph {
                     $uniqueValuesForClass uq:unqForClass ?class
                 } 
                 ?other rdf:type $class .
             }
-        """
-    ] .
+        """ ] ;
+    sh:parameter [ sh:path uq:uniqueValuesForClass ] .

@@ -14,6 +14,7 @@ TESTCASES = [
     if os.path.isdir(os.path.join("testcases/", testcase_))
 ]
 
+
 def write_test_output(file_path: str, serialized_graph: str):
 
     dir_path = os.path.dirname(file_path)
@@ -29,7 +30,9 @@ def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str, mode: str
     else:
         out_file_name = "sql2shacl_shape_thapa.ttl"
 
-    generated_shapes_graph_path = os.path.join(os.path.dirname(sql_path), out_file_name)
+    generated_shapes_graph_path = os.path.join(
+        os.path.dirname(actual_shapes_graph_path), out_file_name
+    )
 
     with open(sql_path, "r", encoding="utf-8") as file:
         sql = file.read()
@@ -40,8 +43,6 @@ def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str, mode: str
         log_level=logging.DEBUG,
         mode=mode,
     )
-
-    logger.debug(serialized_shapes_graph)
 
     write_test_output(generated_shapes_graph_path, serialized_shapes_graph)
 
@@ -61,7 +62,7 @@ def shape_up_and_compare(sql_path: str, actual_shapes_graph_path: str, mode: str
 
 
 @pytest.mark.parametrize("testcase_", TESTCASES)
-def test_sql2shacl_sequeda(testcase_):
+def test_sql2shacl_thapa(testcase_):
     create_sql = os.path.join("testcases", testcase_, "create.sql")
     actual_shapes_graph = os.path.join("testcases", testcase_, "shape_thapa.ttl")
 
@@ -74,3 +75,10 @@ def test_sql2shacl_w3c(testcase_):
     actual_shapes_graph = os.path.join("testcases", testcase_, "shape_w3c.ttl")
 
     shape_up_and_compare(create_sql, actual_shapes_graph, mode="w3c")
+
+
+def test_sql2shacl_thapa_example():
+    create_sql = os.path.join("tests", "ddl", "paper_example.sql")
+    actual_shapes_graph = os.path.join("tests", "shacl", "paper_example.ttl")
+
+    shape_up_and_compare(create_sql, actual_shapes_graph, mode="thapa")

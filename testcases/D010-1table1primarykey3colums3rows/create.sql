@@ -1,5 +1,5 @@
 CREATE TABLE "Country Info" (
-  "Country Code" INTEGER PRIMARY KEY, -- whitespace not possible
+  "Country Code" INTEGER PRIMARY KEY,
   "Name" VARCHAR(100),
   "ISO 3166" VARCHAR(10)
 );
