@@ -213,7 +213,7 @@ class Relation:
             ref_rel_name = constraint.referenced_relation_name
 
             if isinstance(constraint, ColumnForeignKey):
-                col_name = constraint.column_name
+                col_name = constraint.parent.name
                 ref_col_name = constraint.referenced_column_name
 
             if isinstance(constraint, TableForeignKey):
