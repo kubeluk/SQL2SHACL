@@ -163,4 +163,4 @@ cython_debug/
 
 # custom
 .DS_Store
-testcases/*/sql2shacl_shape*.ttl
+sql2shacl_shape*.ttl
