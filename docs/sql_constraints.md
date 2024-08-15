@@ -14,12 +14,13 @@ SQL allows you to define constraints on columns and tables. Constraints give you
 ## handled
 
 - uniqueness of single column
+- uniqueness of groups of columns
 - column and table constraint style
 
 ## un-handled
 
+- Null-values contained in columns that are part of UNIQUE constraint
 - `NULLS NOT DISTINCT` add-on
-- definition of a unique constraint for a group of columns
 
 ```
 CREATE TABLE example (
