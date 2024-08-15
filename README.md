@@ -105,4 +105,4 @@ See the mapping file (`src/components/sqldatatype2xmlschema.json`) for their res
 
 ### N-ary relations
 
-- currently only binary relations are supported
+- currently only binary relations are supported when using "thapa" constraint rewriting mode
