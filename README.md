@@ -56,7 +56,7 @@ python -m sql2shacl --base-iri http://example.com/base/ path/to/file.sql
 ## Run tests
 
 ```
-pytest tests/test_rewriting.py
+poetry run pytest
 ```
 
 ## General
