@@ -2,8 +2,11 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-SQL2SHACL implements the constraint rewriting in two versions:
-one proposed in the paper "A Source-to-Target Constraint rewriting for Direct Mapping" by Ratan Bahadur Thapa and Martin Giese [[1]](#1), other one aligns the W3C Recommendation [A Direct Mapping of Relational Data to RDF](https://www.w3.org/TR/rdb-direct-mapping/)
+SQL2SHACL implements the constraint rewriting proposed in the paper "A Source-to-Target Constraint rewriting for Direct Mapping" by Ratan Bahadur Thapa and Martin Giese in two versions:
+1. based on a Direct Mapping as defined by [Sequeda et al.](https://doi.org/10.1145/2187836.2187924)
+2. based on the W3C Recommendation [A Direct Mapping of Relational Data to RDF](https://www.w3.org/TR/rdb-direct-mapping/)
+
+## Component diagram
 
 ![Architecture diagram](/assets/sql2shacl_arch_dark.svg "Architecture diagram")
 
@@ -73,10 +76,6 @@ The following column and table constraints are supported:
 - UNIQUE
 - PRIMARY KEY
 - REFERENCES
-
-Caveats:
-- groups of attributes as foreign key reference are currently not supported
-- ...
 
 ### Supported SQL data types
 
